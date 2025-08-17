@@ -2,9 +2,10 @@
 
 #pragma once
 
+
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "AuraUserWidget.generated.h"
+#include "AuraUserWidget.generated.h"                                                  
 
 /**
  * 
@@ -21,7 +22,8 @@ public:
 	TObjectPtr<UObject> WidgetController;
 
 protected:
-	
+
+	//蓝图实现 对应蓝图的Event Widget Controller Set
 	UFUNCTION(BlueprintImplementableEvent)
 	void WidgetControllerSet();
 };
