@@ -11,6 +11,9 @@ UOverlayWidgetController* AAuraHUD::GetOverlayWidgetController(const FWidgetCont
 {
 	if (OverlayWidgetController==nullptr)
 	{
+		// 极其不推荐的写法：硬编码蓝图路径
+		// UClass* BlueprintClass = LoadClass<UOverlayWidgetController>(nullptr, TEXT("/Game/Blueprints/BP_CustomOverlayController.BP_CustomOverlayController_C"));
+		// OverlayWidgetController = NewObject<UOverlayWidgetController>(this, BlueprintClass);
 		OverlayWidgetController = NewObject<UOverlayWidgetController>(this, OverlayWidgetControllerClass);
 		OverlayWidgetController->SetWidgetControllerParams(WCParams);
 		return OverlayWidgetController;

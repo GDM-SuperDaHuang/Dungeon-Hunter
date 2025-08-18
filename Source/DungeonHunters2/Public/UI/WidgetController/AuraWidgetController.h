@@ -10,6 +10,8 @@
 class UAttributeSet;
 class UAbilitySystemComponent;
 
+//开发者可以在蓝图中创建一个 FWidgetControllerParams 类型的变量，
+//并为其 PlayerController、AbilitySystemComponent 等成员赋值（比如绑定到当前玩家的控制器）。
 USTRUCT(BlueprintType)
 struct FWidgetControllerParams
 {
@@ -18,6 +20,8 @@ struct FWidgetControllerParams
 	{
 	}
 
+	//结构体的带参构造函数
+	//其作用是在构造函数体执行之前，直接初始化结构体 / 类的成员变量
 	FWidgetControllerParams(APlayerController* PC, APlayerState* PS, UAbilitySystemComponent* ASC, UAttributeSet* AS)
 		: PlayerController(PC), PlayerState(PS), AbilitySystemComponent(ASC), AttributeSet(AS)
 	{
