@@ -41,7 +41,10 @@ struct FWidgetControllerParams
 };
 
 /**
- * 
+ * 内有 控制器,玩家状态，能力系统组件，属性集
+ * 用于绑定属性变化回调
+ * 用于广播属性初始值
+
  */
 UCLASS()
 class DUNGEONHUNTERS2_API UAuraWidgetController : public UObject

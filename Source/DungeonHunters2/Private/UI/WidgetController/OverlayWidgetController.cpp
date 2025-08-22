@@ -14,6 +14,11 @@ void UOverlayWidgetController::BroadcastIntialValues()
 	
 }
 
+/**
+ * 绑定属性变化回调
+ * 当属性值发生变化时，会调用对应的回调函数
+ * 回调函数会广播属性值的变化，使 UI 能够及时更新
+ */
 void UOverlayWidgetController::BindCallbacksToDependences()
 {
 	// Super::BindCallbacksToDependences();
