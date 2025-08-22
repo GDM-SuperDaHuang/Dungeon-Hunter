@@ -42,6 +42,13 @@ void AAuraEffectActor::OnOverlap(UPrimitiveComponent* UOverlappedComponent, AAct
 		UAureAttributeSet* MutableAuraAttriButeSet = const_cast<UAureAttributeSet*>(AureAttributeSet);
 		//修改属性，出方式不会触发回调 UOverlayWidgetController::HealthChanged
 		MutableAuraAttriButeSet->SetHealth(AureAttributeSet->GetHealth()+25.f);
+		/**
+		 * // 触发回调的方式：使用ASC的SetNumericAttributeBase接口
+			AbilitySystemComponent->SetNumericAttributeBase(
+				UAureAttributeSet::GetHealthAttribute(),  // 属性标识
+				AureAttributeSet->GetHealth() + 25.f      // 新值
+			);
+		 */
 		Destroy();
 	}
 	
