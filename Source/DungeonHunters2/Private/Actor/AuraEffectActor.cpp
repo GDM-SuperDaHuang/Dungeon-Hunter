@@ -3,6 +3,10 @@
 
 #include "Actor/AuraEffectActor.h"
 
+#include "AbilitySystemBlueprintLibrary.h"
+#include "AbilitySystemComponent.h"
+#include "AbilitySystemInterface.h"
+
 // #include "AbilitySystemComponent.h"
 // #include "AbilitySystemInterface.h"
 // #include "AbilitySystem/AureAttributeSet.h"
@@ -17,7 +21,7 @@ AAuraEffectActor::AAuraEffectActor()
 	// Sphere = CreateDefaultSubobject<USphereComponent>("Sphere");// 创建球形碰撞组件
 	// Sphere->SetupAttachment(GetRootComponent());// 将碰撞组件附着到根组件（Mesh）上
 
-	this->SetRootComponent(CreateDefaultSubobject<USceneComponent>("Root"));
+	this->SetRootComponent(CreateDefaultSubobject<USceneComponent>("SceneRoot"));
 	
 }
 
@@ -83,6 +87,17 @@ void AAuraEffectActor::BeginPlay()
 	 */
 	// Sphere->OnComponentBeginOverlap.AddDynamic(this,&AAuraEffectActor::OnOverlap);
 	// Sphere->OnComponentEndOverlap.AddDynamic(this,&AAuraEffectActor::EndOverlap);
+}
+
+void AAuraEffectActor::ApplyEffectToTarget(AActor* Target, TSubclassOf<UGameplayEffect> GameplayEffectClass)
+{
+	UAbilitySystemComponent* TargetASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(Target);
+	if (TargetASC) return;
+	check(GameplayEffectClass);
+	FGameplayEffectContextHandle EffectContextHandle = TargetASC->MakeEffectContext();
+	EffectContextHandle.AddSourceObject(this);
+	const FGameplayEffectSpecHandle EffectSpecHandle = TargetASC->MakeOutgoingSpec(GameplayEffectClass,1.f,EffectContextHandle);
+	TargetASC->ApplyGameplayEffectSpecToSelf(*EffectSpecHandle.Data.Get());
 }
 
 

@@ -3,15 +3,16 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Components/SphereComponent.h"
 #include "GameFramework/Actor.h"
 #include "AuraEffectActor.generated.h"
+class UGameplayEffect;
+
 UCLASS()
 class DUNGEONHUNTERS2_API AAuraEffectActor : public AActor
 {
 	GENERATED_BODY()
-	
-public:	
+
+public:
 	// Sets default values for this actor's properties
 	AAuraEffectActor();
 	// UFUNCTION()
@@ -22,6 +23,12 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+
+
+	void ApplyEffectToTarget(AActor* Target, TSubclassOf<UGameplayEffect> GameplayEffectClass);
+
+	UPROPERTY(EditAnywhere, Category="Applied Effects")
+	TSubclassOf<UGameplayEffect> InstantGameplayEffectClass;
 
 private:
 	// UPROPERTY(VisibleAnywhere)
