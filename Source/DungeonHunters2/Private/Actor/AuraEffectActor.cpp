@@ -89,13 +89,29 @@ void AAuraEffectActor::BeginPlay()
 	// Sphere->OnComponentEndOverlap.AddDynamic(this,&AAuraEffectActor::EndOverlap);
 }
 
+/**
+ * Target: 当前的AAuraEffectActor实例，如血瓶,蓝瓶之类。
+ * UGameplayEffect: 是效果的 “蓝图模板”，定义了效果的类型（瞬时 / 持续 / 周期性）、影响的属性（如加血、减蓝）、数值规则（如 + 50 血、每秒 - 10 血）等静态配置。
+ * 					指定基于哪个 UGameplayEffect 模板生成规格（例如 “治疗效果”“中毒效果”）。
+ */
 void AAuraEffectActor::ApplyEffectToTarget(AActor* Target, TSubclassOf<UGameplayEffect> GameplayEffectClass)
 {
+	// 1. 获取目标的 AbilitySystemComponent（ASC）
+	//只有实现了 IAbilitySystemInterface 的 Actor（如玩家 AAuraCharacter、敌人 AAuraEnemy）才会拥有 ASC
 	UAbilitySystemComponent* TargetASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(Target);
-	if (TargetASC) return;
+	if (!TargetASC) return;
+	// 2. 校验效果模板有效性
 	check(GameplayEffectClass);
+	// 3. 创建效果上下文（记录效果来源等信息）FGameplayEffectContextHandle
+	//作用：上下文用于存储效果的额外元数据，如效果的来源（哪个 Actor 施加的）、触发方式（碰撞 / 技能等），方便后续逻辑追溯（如伤害来源判定、效果来源显示）。
+	//实现：EffectContextHandle.AddSourceObject(this) 将当前 AAuraEffectActor 设为效果来源，后续可通过上下文获取该信息,
+	//	   例如在日志中记录 “治疗光球（AuraEffectActor）为玩家施加了加血效果”）。
 	FGameplayEffectContextHandle EffectContextHandle = TargetASC->MakeEffectContext();
-	EffectContextHandle.AddSourceObject(this);
+	EffectContextHandle.AddSourceObject(this);// 记录效果来源是当前 AuraEffectActor
+	// 4. 生成效果规格并应用到目标
+	// MakeOutgoingSpec 会基于这个 UGameplayEffect 模板，生成一个包含动态参数的 “实例规格”（FGameplayEffectSpec），相当于 “根据模板创建一个具体的执行计划”
+	// Level：效果的等级（代码中是 1.f），用于动态调整效果强度（例如等级 2 的治疗量是等级 1 的 2 倍，模板中可通过 Level 变量定义数值规则）。
+	// EffectContextHandle：效果上下文（FGameplayEffectContextHandle），包含效果的来源、触发方式等元数据（如 “这个治疗效果来自哪个 AuraEffectActor”）。
 	const FGameplayEffectSpecHandle EffectSpecHandle = TargetASC->MakeOutgoingSpec(GameplayEffectClass,1.f,EffectContextHandle);
 	TargetASC->ApplyGameplayEffectSpecToSelf(*EffectSpecHandle.Data.Get());
 }
