@@ -15,14 +15,13 @@
 // 初始化需要碰撞的物品
 AAuraEffectActor::AAuraEffectActor()
 {
-	PrimaryActorTick.bCanEverTick = false;// 禁用 Tick 函数（不需要每帧更新）
+	PrimaryActorTick.bCanEverTick = false; // 禁用 Tick 函数（不需要每帧更新）
 	// Mesh = CreateDefaultSubobject<UStaticMeshComponent>("Mesh");// 创建静态网格组件
 	// SetRootComponent(Mesh);// 将 Mesh 设为根组件
 	// Sphere = CreateDefaultSubobject<USphereComponent>("Sphere");// 创建球形碰撞组件
 	// Sphere->SetupAttachment(GetRootComponent());// 将碰撞组件附着到根组件（Mesh）上
 
 	this->SetRootComponent(CreateDefaultSubobject<USceneComponent>("SceneRoot"));
-	
 }
 
 /**
@@ -72,7 +71,7 @@ AAuraEffectActor::AAuraEffectActor()
 void AAuraEffectActor::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	/***
 	 * OnComponentBeginOverlap是 OnComponentBeginOverlap 是 Unreal 内置的动态多播委托，
 	 * DECLARE_DYNAMIC_MULTICAST_DELEGATE_SixParams(
@@ -107,14 +106,74 @@ void AAuraEffectActor::ApplyEffectToTarget(AActor* Target, TSubclassOf<UGameplay
 	//实现：EffectContextHandle.AddSourceObject(this) 将当前 AAuraEffectActor 设为效果来源，后续可通过上下文获取该信息,
 	//	   例如在日志中记录 “治疗光球（AuraEffectActor）为玩家施加了加血效果”）。
 	FGameplayEffectContextHandle EffectContextHandle = TargetASC->MakeEffectContext();
-	EffectContextHandle.AddSourceObject(this);// 记录效果来源是当前 AuraEffectActor
+	EffectContextHandle.AddSourceObject(this); // 记录效果来源是当前 AuraEffectActor
 	// 4. 生成效果规格并应用到目标
 	// MakeOutgoingSpec 会基于这个 UGameplayEffect 模板，生成一个包含动态参数的 “实例规格”（FGameplayEffectSpec），相当于 “根据模板创建一个具体的执行计划”
 	// Level：效果的等级（代码中是 1.f），用于动态调整效果强度（例如等级 2 的治疗量是等级 1 的 2 倍，模板中可通过 Level 变量定义数值规则）。
 	// EffectContextHandle：效果上下文（FGameplayEffectContextHandle），包含效果的来源、触发方式等元数据（如 “这个治疗效果来自哪个 AuraEffectActor”）。
-	const FGameplayEffectSpecHandle EffectSpecHandle = TargetASC->MakeOutgoingSpec(GameplayEffectClass,1.f,EffectContextHandle);
-	TargetASC->ApplyGameplayEffectSpecToSelf(*EffectSpecHandle.Data.Get());
+	const FGameplayEffectSpecHandle EffectSpecHandle = TargetASC->MakeOutgoingSpec(
+		GameplayEffectClass, ActorLevel, EffectContextHandle);
+	const FActiveGameplayEffectHandle ActiveEffectHandle = TargetASC->ApplyGameplayEffectSpecToSelf(
+		*EffectSpecHandle.Data.Get());
+
+	const bool bIsInfinite = EffectSpecHandle.Data.Get()->Def.Get()->DurationPolicy ==
+		EGameplayEffectDurationType::Infinite;
+	if (bIsInfinite && InfiniteEEffectRemovalPolicy == EEffectRemovalPolicy::RemoveOnEndOverlap)
+	{
+		ActiveEffectHandles.Add(ActiveEffectHandle, TargetASC);
+	}
 }
 
+void AAuraEffectActor::OnOverlap(AActor* TargetActor)
+{
+	if (InstantEffectApplicationPolicy == EEffectApplicationPolicy::ApplyOnOverlap)
+	{
+		ApplyEffectToTarget(TargetActor, InstantGameplayEffectClass);
+	}
 
+	if (DurationEffectApplicationPolicy == EEffectApplicationPolicy::ApplyOnOverlap)
+	{
+		ApplyEffectToTarget(TargetActor, DurationGameplayEffectClass);
+	}
+	if (InfiniteEffectApplicationPolicy == EEffectApplicationPolicy::ApplyOnOverlap)
+	{
+		ApplyEffectToTarget(TargetActor, InfiniteGameplayEffectClass);
+	}
+}
 
+void AAuraEffectActor::EndOverlap(AActor* TargetActor)
+{
+	if (InstantEffectApplicationPolicy == EEffectApplicationPolicy::ApplyOnEndOverlap)
+	{
+		ApplyEffectToTarget(TargetActor, InstantGameplayEffectClass);
+	}
+	if (InstantEffectApplicationPolicy == EEffectApplicationPolicy::ApplyOnEndOverlap)
+	{
+		ApplyEffectToTarget(TargetActor, DurationGameplayEffectClass);
+	}
+	if (InfiniteEffectApplicationPolicy == EEffectApplicationPolicy::ApplyOnEndOverlap)
+	{
+		ApplyEffectToTarget(TargetActor, DurationGameplayEffectClass);
+	}
+	if (InfiniteEEffectRemovalPolicy == EEffectRemovalPolicy::RemoveOnEndOverlap)
+	{
+		UAbilitySystemComponent* TargetASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(TargetActor);
+		if (!IsValid(TargetASC)) return;
+
+		TArray<FActiveGameplayEffectHandle> HandleToRemove;
+		for (TTuple<FActiveGameplayEffectHandle, UAbilitySystemComponent*> HandlePair : ActiveEffectHandles)
+		{
+			if (TargetASC == HandlePair.Value)
+			{
+				//只移除一个堆栈
+				TargetASC->RemoveActiveGameplayEffect(HandlePair.Key, 1);
+				HandleToRemove.Add(HandlePair.Key);
+			}
+		}
+		for (auto& Handle : HandleToRemove)
+		{
+			ActiveEffectHandles.FindAndRemoveChecked(Handle);
+			// ActiveEffectHandles.Remove(Handle);
+		}
+	}
+}
