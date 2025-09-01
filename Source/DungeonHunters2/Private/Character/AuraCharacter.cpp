@@ -42,7 +42,9 @@ void AAuraCharacter::InitAbilityActorInfo()
 	AAurePlayerState* AurePlayerState = GetPlayerState<AAurePlayerState>();
 	check(AurePlayerState);
 	AurePlayerState->GetAbilitySystemComponent()->InitAbilityActorInfo(AurePlayerState, this);
-	Cast<UAureAbilitySystemComponent>(AurePlayerState->GetAbilitySystemComponent())->AbilityActorInfoSet();
+	UAureAbilitySystemComponent* AureASC = Cast<UAureAbilitySystemComponent>(AurePlayerState->GetAbilitySystemComponent());
+	// check(AureASC); // 验证转换结果，确保非空
+	AureASC->AbilityActorInfoSet();
 	AbilitySystemComponent = AurePlayerState->GetAbilitySystemComponent();
 	AttributeSet = AurePlayerState->GetAttributeSet();
 

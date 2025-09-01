@@ -5,6 +5,7 @@
 
 void UAureAbilitySystemComponent::AbilityActorInfoSet()
 {
+	UE_LOG(LogTemp, Log, TEXT("UAureAbilitySystemComponent created: %p"), this);
 	OnGameplayEffectAppliedDelegateToSelf.AddUObject(this,&UAureAbilitySystemComponent::EffectApplied);
 }
 
