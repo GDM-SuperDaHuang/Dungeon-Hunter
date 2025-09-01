@@ -31,4 +31,5 @@ protected:
 	// //
 	// UPROPERTY(BlueprintReadOnly)
 	// bool bHighlighted = false;
+	virtual void InitAbilityActorInfo() override;
 };

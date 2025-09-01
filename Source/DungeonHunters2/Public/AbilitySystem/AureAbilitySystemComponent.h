@@ -13,7 +13,8 @@ UCLASS()
 class DUNGEONHUNTERS2_API UAureAbilitySystemComponent : public UAbilitySystemComponent
 {
 	GENERATED_BODY()
-	protected:
-
-	void  EffectApplied(UAbilitySystemComponent* AbilitySystemComponent, const FGameplayEffectSpec& EffectSpec, FActiveGameplayEffectHandle ActiveEffectHandle);
+public:
+	void AbilityActorInfoSet();
+protected:
+	void EffectApplied(UAbilitySystemComponent* AbilitySystemComponent, const FGameplayEffectSpec& EffectSpec, FActiveGameplayEffectHandle ActiveEffectHandle);
 };
