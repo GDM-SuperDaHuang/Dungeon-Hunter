@@ -32,6 +32,7 @@ void UAureAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, 
 	Super::PreAttributeChange(Attribute, NewValue);
 	if (Attribute == GetHealthAttribute())
 	{
+		// 限制Health在0到MaxHealth之间
 		NewValue = FMath::Clamp(NewValue, 0.0f, GetMaxHealth());
 		// UE_LOG(LogTemp, Warning, TEXT("Health=%f"), NewValue);
 	}
@@ -88,7 +89,7 @@ void UAureAttributeSet::PostGameplayEffectExecute(const struct FGameplayEffectMo
 {
 	Super::PostGameplayEffectExecute(Data);
 	FEffectProperties Props;
-	SetEffectProperties(Data, Props);
+	SetEffectProperties(Data, Props);// 解析效果的源和目标信息
 	                                                                                                                                                                                                                                                                                                                                                                                                                                                         
 
 	if (Data.EvaluatedData.Attribute == GetHealthAttribute())

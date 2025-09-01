@@ -24,8 +24,9 @@ struct FEffectProperties
 	{
 	}
 
-	FGameplayEffectContextHandle EffectContextHandle;
+	FGameplayEffectContextHandle EffectContextHandle;// 效果上下文句柄，存储效果元数据
 
+	// 源（施加效果的对象）相关信息
 	UPROPERTY()
 	UAbilitySystemComponent* SourceASC;
 	UPROPERTY()
@@ -35,7 +36,7 @@ struct FEffectProperties
 	UPROPERTY()
 	ACharacter* SourceCharacter;
 
-
+	// 目标（接收效果的对象）相关信息
 	UPROPERTY()
 	UAbilitySystemComponent* TargetASC;
 	UPROPERTY()
