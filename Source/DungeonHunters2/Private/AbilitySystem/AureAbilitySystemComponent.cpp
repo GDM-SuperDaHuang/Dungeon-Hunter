@@ -14,5 +14,14 @@ void UAureAbilitySystemComponent::AbilityActorInfoSet()
 void UAureAbilitySystemComponent::EffectApplied(UAbilitySystemComponent* AbilitySystemComponent,
                                                 const FGameplayEffectSpec& EffectSpec, FActiveGameplayEffectHandle ActiveEffectHandle)
 {
-	GEngine->AddOnScreenDebugMessage(1,8.f,FColor::Blue,FString("EffectApplied"));
+	// GEngine->AddOnScreenDebugMessage(1,8.f,FColor::Blue,FString("EffectApplied"));
+	FGameplayTagContainer TagContainer;
+	EffectSpec.GetAllAssetTags(TagContainer);
+	EffectAssetTags.Broadcast(TagContainer);
+
+	// for ( const FGameplayTag& Tag:TagContainer)
+	// {
+	// 	const FString Msg = FString::Printf(TEXT("tag:%s"), *Tag.ToString());
+	// 	GEngine->AddOnScreenDebugMessage(-1,8.f,FColor::Blue,Msg);
+	// }
 }
