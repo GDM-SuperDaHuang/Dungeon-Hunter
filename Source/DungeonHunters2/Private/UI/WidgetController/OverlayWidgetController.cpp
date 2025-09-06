@@ -1,8 +1,5 @@
 // daHuang
-
-
 #include "UI/WidgetController/OverlayWidgetController.h"
-
 #include "AbilitySystem/AureAbilitySystemComponent.h"
 #include "AbilitySystem/AureAttributeSet.h"
 
@@ -51,6 +48,8 @@ void UOverlayWidgetController::BindCallbacksToDependences()
 			{
 				const FString Msg = FString::Printf(TEXT("tag:%s"), *Tag.ToString());
 				GEngine->AddOnScreenDebugMessage(-1, 8.f, FColor::Blue, Msg);
+				FUIWidgetRow* Row = GetDataTableRowByTag<FUIWidgetRow>(MessageWidgetDataTable,Tag);
+				
 			}
 		});
 }
