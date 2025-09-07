@@ -6,6 +6,7 @@
 #include "AbilitySystemComponent.h"
 #include "AbilitySystem/AureAbilitySystemComponent.h"
 #include "AbilitySystem/AureAttributeSet.h"
+#include "Net/UnrealNetwork.h"
 
 AAurePlayerState::AAurePlayerState()
 {
@@ -20,7 +21,19 @@ AAurePlayerState::AAurePlayerState()
 	AttributeSet=CreateDefaultSubobject<UAureAttributeSet>("AttributeSet");
 }
 
+void AAurePlayerState::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	
+	DOREPLIFETIME(AAurePlayerState,Level);
+}
+
 UAbilitySystemComponent* AAurePlayerState::GetAbilitySystemComponent() const
 {
 	return AbilitySystemComponent;
+}
+
+void AAurePlayerState::OnRep_Level()
+{
+	
 }

@@ -11,7 +11,7 @@
  * 
  */
 UCLASS()
-class DUNGEONHUNTERS2_API AAuraEnemy : public AAuraCharacterBase,public IEnenmyInterface
+class DUNGEONHUNTERS2_API AAuraEnemy : public AAuraCharacterBase, public IEnenmyInterface
 {
 	GENERATED_BODY()
 
@@ -26,10 +26,18 @@ public:
 	virtual void UnHighlightActor() override;
 	/** End IEnenmyInterface */
 
+	/**combat Interface*/
+	virtual int32 GetPlayerLevel() override;
+
 protected:
 	virtual void BeginPlay() override;
 	// //
 	// UPROPERTY(BlueprintReadOnly)
 	// bool bHighlighted = false;
 	virtual void InitAbilityActorInfo() override;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Character Class Defaults")
+	int32 Level = 1;
+
+private:
 };

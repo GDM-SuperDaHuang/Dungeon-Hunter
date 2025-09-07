@@ -28,48 +28,66 @@ void UOverlayWidgetController::BindCallbacksToDependences()
 	/***
 	 * 只有当属性通过UAbilitySystemComponent提供的官方接口修改时，才会发生回调，其他方式不会回调，
 	 * 如：
-	 * 1，AbilitySystemComponent->SetNumericAttributeBase(UAureAttributeSet::GetHealthAttribute(), NewHealthValue);
+	 * 1，AbilitySystemComponent->SetNuwmericAttributeBase(UAureAttributeSet::GetHealthAttribute(), NewHealthValue);
 	 * 2，
 	 */
-	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AuraAttributeSet->GetHealthAttribute()).AddUObject(
-		this, &UOverlayWidgetController::HealthChanged);
-	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AuraAttributeSet->GetMaxHealthAttribute()).
-	                        AddUObject(this, &UOverlayWidgetController::MaxHealthChanged);
+	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AuraAttributeSet->GetHealthAttribute())
+	                      .AddLambda([this](const FOnAttributeChangeData& Data)
+	                      {
+		                      OnHealthChanged.Broadcast(Data.NewValue);
+	                      });
+	
+	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AuraAttributeSet->GetMaxHealthAttribute())
+	.AddLambda([this](const FOnAttributeChangeData& Data)
+							  {
+								  OnMaxHealthChanged.Broadcast(Data.NewValue);
+							  });
+	
+	// AddUObject(this, &UOverlayWidgetController::MaxHealthChanged);
 
-	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AuraAttributeSet->GetManaAttribute()).AddUObject(
-		this, &UOverlayWidgetController::ManaChanged);
-	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AuraAttributeSet->GetMaxManaAttribute()).AddUObject(
-		this, &UOverlayWidgetController::MaxManaChanged);
+	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AuraAttributeSet->GetManaAttribute())
+	.AddLambda([this](const FOnAttributeChangeData& Data)
+							  {
+								  OnManaChanged.Broadcast(Data.NewValue);
+							  });
+	//this, &UOverlayWidgetController::ManaChanged);
+	
+	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AuraAttributeSet->GetMaxManaAttribute())
+	.AddLambda([this](const FOnAttributeChangeData& Data)
+								  {
+									  OnMaxManaChanged.Broadcast(Data.NewValue);
+								  });
+
+	// .AddUObject(this, &UOverlayWidgetController::MaxManaChanged);
 
 	Cast<UAureAbilitySystemComponent>(AbilitySystemComponent)->EffectAssetTags.AddLambda(
 		[this](const FGameplayTagContainer& AssetTags)
 		{
 			for (const FGameplayTag& Tag : AssetTags)
 			{
-				const FString Msg = FString::Printf(TEXT("tag:%s"), *Tag.ToString());
-				GEngine->AddOnScreenDebugMessage(-1, 8.f, FColor::Blue, Msg);
-				FUIWidgetRow* Row = GetDataTableRowByTag<FUIWidgetRow>(MessageWidgetDataTable,Tag);
-				
+				FGameplayTag MessageTag = FGameplayTag::RequestGameplayTag(FName("Message"));
+				if (Tag.MatchesTag(MessageTag))
+				{
+					FUIWidgetRow* Row = GetDataTableRowByTag<FUIWidgetRow>(MessageWidgetDataTable, Tag);
+					MessageWidgetRowDelegate.Broadcast(*Row);
+				}
+				// const FString Msg = FString::Printf(TEXT("tag:%s"), *Tag.ToString());
+				// GEngine->AddOnScreenDebugMessage(-1, 8.f, FColor::Blue, Msg);
 			}
 		});
 }
 
-void UOverlayWidgetController::HealthChanged(const FOnAttributeChangeData& Data) const
-{
-	OnHealthChanged.Broadcast(Data.NewValue);
-}
+// void UOverlayWidgetController::MaxHealthChanged(const FOnAttributeChangeData& Data) const
+// {
+// 	OnMaxHealthChanged.Broadcast(Data.NewValue);
+// }
+//
+// void UOverlayWidgetController::ManaChanged(const FOnAttributeChangeData& Data) const
+// {
+// 	OnManaChanged.Broadcast(Data.NewValue);
+// }
 
-void UOverlayWidgetController::MaxHealthChanged(const FOnAttributeChangeData& Data) const
-{
-	OnMaxHealthChanged.Broadcast(Data.NewValue);
-}
-
-void UOverlayWidgetController::ManaChanged(const FOnAttributeChangeData& Data) const
-{
-	OnManaChanged.Broadcast(Data.NewValue);
-}
-
-void UOverlayWidgetController::MaxManaChanged(const FOnAttributeChangeData& Data) const
-{
-	OnMaxManaChanged.Broadcast(Data.NewValue);
-}
+// void UOverlayWidgetController::MaxManaChanged(const FOnAttributeChangeData& Data) const
+// {
+// 	OnMaxManaChanged.Broadcast(Data.NewValue);
+// }

@@ -6,13 +6,15 @@
 #include "AbilitySystemInterface.h"
 #include "AbilitySystem/AureAttributeSet.h"
 #include "GameFramework/Character.h"
+#include "Interaction/CombatInterface.h"
 #include "AuraCharacterBase.generated.h"
 
 class UAbilitySystemComponent;
 class UAttributeSet;
+// class UGameplayEffect;
 
 UCLASS(Abstract)
-class DUNGEONHUNTERS2_API AAuraCharacterBase : public ACharacter,public IAbilitySystemInterface
+class DUNGEONHUNTERS2_API AAuraCharacterBase : public ACharacter,public IAbilitySystemInterface,public ICombatInterface
 {
 	GENERATED_BODY()
 
@@ -32,4 +34,15 @@ protected:
 	TObjectPtr<UAttributeSet> AttributeSet;
 
 	virtual void InitAbilityActorInfo();
+
+	UPROPERTY(BlueprintReadOnly, EditAnywhere,Category="Abilities")
+	TSubclassOf<UGameplayEffect> DefaultAbilityEffect;
+
+	UPROPERTY(BlueprintReadOnly, EditAnywhere,Category="Abilities")
+	TSubclassOf<UGameplayEffect> DefaultSecondaryAbilityEffect;
+	
+	void ApplyEffectToSelf(TSubclassOf<UGameplayEffect> GameplayEffectClass,float Leve) const;
+	void InitializeDefaultAbilities() const;
+	
+
 };
