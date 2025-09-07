@@ -11,10 +11,12 @@
 UAureAttributeSet::UAureAttributeSet()
 {
 	//属性宏产生
-	InitHealth(100.f);
-	InitMaxHealth(150.f);
-	InitMana(100.f);
-	InitMaxMana(150.f);
+	// InitHealth(10.f);
+	// InitMaxHealth(150.f);
+	// InitMana(10.f);
+	// InitMaxMana(150.f);
+
+	
 }
 
 void UAureAttributeSet::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const

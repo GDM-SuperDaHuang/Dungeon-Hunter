@@ -3,7 +3,7 @@
 #include "Palyer/AuraPlayerController.h"
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
-#include "Interaction/EnenmyInterface"
+#include "Interaction/EnenmyInterface.h"
 
 AAuraPlayerController::AAuraPlayerController()
 {
