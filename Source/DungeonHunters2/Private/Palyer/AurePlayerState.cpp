@@ -24,7 +24,11 @@ AAurePlayerState::AAurePlayerState()
 void AAurePlayerState::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	
+	/** 
+	 * 第一个参数 AAurePlayerState是声明属性的类名。
+	 * 第二个参数 Level是要复制的变量名。 
+	 * 使用getLevel就能获取到最新的Level
+	 */
 	DOREPLIFETIME(AAurePlayerState,Level);
 }
 
