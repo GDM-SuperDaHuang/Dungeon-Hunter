@@ -76,16 +76,19 @@ void UAureAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, 
 
 void UAureAttributeSet::SetEffectProperties(const struct FGameplayEffectModCallbackData& Data, FEffectProperties& props) const
 {
-	// source = 
+	// 1. 获取效果上下文
 	props.EffectContextHandle = Data.EffectSpec.GetContext();
+	// 2. 获取源能力系统组件（施加效果的一方）
 	props.SourceASC = props.EffectContextHandle.GetOriginalInstigatorAbilitySystemComponent();
 
-	if (IsValid(props.SourceASC) && props.SourceASC->AbilityActorInfo.IsValid() && props.SourceASC->AbilityActorInfo->
-		AvatarActor.
-		IsValid())
+	// 3. 获取源相关信息
+	if (IsValid(props.SourceASC) && props.SourceASC->AbilityActorInfo.IsValid() && props.SourceASC->AbilityActorInfo->AvatarActor.IsValid())
 	{
+		// 源Avatar角色（通常是角色实例）
 		props.SourceAvatarActor = props.SourceASC->AbilityActorInfo->AvatarActor.Get();
+		// 源控制器
 		props.SourceController = props.SourceASC->AbilityActorInfo->PlayerController.Get();
+		// 如果直接获取控制器失败，尝试通过Pawn获取
 		if (props.SourceController == nullptr && props.SourceAvatarActor != nullptr)
 		{
 			if (const APawn* Pawn = Cast<APawn>(props.SourceAvatarActor))
@@ -93,17 +96,23 @@ void UAureAttributeSet::SetEffectProperties(const struct FGameplayEffectModCallb
 				props.SourceController = Pawn->GetController();
 			}
 		}
+		// 源角色
 		if (props.SourceController != nullptr)
 		{
 			props.SourceCharacter = Cast<ACharacter>(props.SourceController->GetPawn());
 		}
 	}
 
+	// 4. 获取目标相关信息（接收效果的一方）
 	if (Data.Target.AbilityActorInfo.IsValid() && Data.Target.AbilityActorInfo->AvatarActor.IsValid())
 	{
+		// 目标Avatar角色
 		props.TargetAvatarActor = Data.Target.AbilityActorInfo->AvatarActor.Get();
+		// 目标控制器
 		props.TargetController = Data.Target.AbilityActorInfo->PlayerController.Get();
+		// 目标角色
 		props.TargetCharacter = Cast<ACharacter>(props.TargetAvatarActor);
+		// 目标能力系统组件
 		props.TargetASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(props.TargetAvatarActor);
 	}
 }
@@ -111,9 +120,11 @@ void UAureAttributeSet::SetEffectProperties(const struct FGameplayEffectModCallb
 void UAureAttributeSet::PostGameplayEffectExecute(const struct FGameplayEffectModCallbackData& Data)
 {
 	Super::PostGameplayEffectExecute(Data);
+	// 创建效果属性结构并填充数据
 	FEffectProperties Props;
 	SetEffectProperties(Data, Props);// 解析效果的源和目标信息
 
+	// 生命值处理：确保在效果应用后仍然在合法范围内
 	if (Data.EvaluatedData.Attribute == GetHealthAttribute())
 	{
 		// 限制Health在0到MaxHealth之间
@@ -138,6 +149,12 @@ void UAureAttributeSet::PostGameplayEffectExecute(const struct FGameplayEffectMo
 		UE_LOG(LogTemp, Warning, TEXT("Magnitude=%f"), Data.EvaluatedData.Magnitude);
 	}
 }
+
+/******************************************
+ * 属性复制回调函数
+ * 当属性通过网络复制时调用
+ * 主要用于处理客户端接收到新属性值后的逻辑
+ ******************************************/
 
 void UAureAttributeSet::OnRep_Health(const FGameplayAttributeData& OldHealth) const
 {

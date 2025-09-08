@@ -14,8 +14,7 @@ class UAttributeSet;
 // class UGameplayEffect;
 
 UCLASS(Abstract)
-class DUNGEONHUNTERS2_API AAuraCharacterBase : public ACharacter, public IAbilitySystemInterface,
-                                               public ICombatInterface
+class DUNGEONHUNTERS2_API AAuraCharacterBase : public ACharacter, public IAbilitySystemInterface, public ICombatInterface
 {
 	GENERATED_BODY()
 

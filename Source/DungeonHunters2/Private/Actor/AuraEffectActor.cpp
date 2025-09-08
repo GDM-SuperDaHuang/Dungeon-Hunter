@@ -89,8 +89,8 @@ void AAuraEffectActor::BeginPlay()
 }
 
 /**
- * Target: 当前的AAuraEffectActor实例，如血瓶,蓝瓶之类。
- * UGameplayEffect: 是效果的 “蓝图模板”，定义了效果的类型（瞬时 / 持续 / 周期性）、影响的属性（如加血、减蓝）、数值规则（如 + 50 血、每秒 - 10 血）等静态配置。
+ * Target: 当前的玩家,
+ * UGameplayEffect: AAuraEffectActor实例，如血瓶,蓝瓶之类效果的 “蓝图模板”，定义了效果的类型（瞬时 / 持续 / 周期性）、影响的属性（如加血、减蓝）、数值规则（如 + 50 血、每秒 - 10 血）等静态配置。
  * 					指定基于哪个 UGameplayEffect 模板生成规格（例如 “治疗效果”“中毒效果”）。
  */
 void AAuraEffectActor::ApplyEffectToTarget(AActor* Target, TSubclassOf<UGameplayEffect> GameplayEffectClass)

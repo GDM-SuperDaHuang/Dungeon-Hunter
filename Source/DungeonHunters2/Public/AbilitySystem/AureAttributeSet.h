@@ -28,23 +28,23 @@ struct FEffectProperties
 
 	// 源（施加效果的对象）相关信息
 	UPROPERTY()
-	UAbilitySystemComponent* SourceASC;
+	UAbilitySystemComponent* SourceASC;	// 来源的能力系统组件
 	UPROPERTY()
-	AActor* SourceAvatarActor;
+	AActor* SourceAvatarActor;// 来源的Avatar角色
 	UPROPERTY()
-	AController* SourceController;
+	AController* SourceController;// 来源的控制器
 	UPROPERTY()
-	ACharacter* SourceCharacter;
+	ACharacter* SourceCharacter; // 来源的角色
 
 	// 目标（接收效果的对象）相关信息
 	UPROPERTY()
-	UAbilitySystemComponent* TargetASC;
+	UAbilitySystemComponent* TargetASC; // 目标的能力系统组件
 	UPROPERTY()
-	AActor* TargetAvatarActor;
+	AActor* TargetAvatarActor;// 目标的Avatar角色
 	UPROPERTY()
-	AController* TargetController;
+	AController* TargetController;// 目标的控制器
 	UPROPERTY()
-	ACharacter* TargetCharacter;
+	ACharacter* TargetCharacter;// 目标的角色
 };
 
 /**
@@ -58,10 +58,12 @@ class DUNGEONHUNTERS2_API UAureAttributeSet : public UAttributeSet
 public:
 	UAureAttributeSet();
 
+	// 网络复制支持：定义哪些属性需要复制到客户端
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;;
 
 	// 执行时机是属性值即将被修改但尚未实际更新到 FGameplayAttributeData 之前
 	virtual void PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue) override;
+	// 效果执行后的回调（后处理阶段）
 	virtual void PostGameplayEffectExecute(const struct FGameplayEffectModCallbackData& Data) override;
 
 
@@ -181,5 +183,6 @@ public:
 	void OnRep_ManaRegeneration(const FGameplayAttributeData& OldValue) const;
 	
 private:
+	// 设置效果属性 - 提取效果相关的上下文信息
 	void SetEffectProperties(const struct FGameplayEffectModCallbackData& Data, FEffectProperties& props) const;
 };

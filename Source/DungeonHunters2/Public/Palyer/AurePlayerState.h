@@ -22,8 +22,11 @@ public:
 	AAurePlayerState();
 	// virtual void GetLifetimeReplicatedProps(float DeltaTime) override;
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
-	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
+	/*** IAbilitySystemInterface */
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
+	/*** IAbilitySystemInterface end*/
+	
 	FORCEINLINE UAttributeSet* GetAttributeSet() const { return AttributeSet; }
 
 	int32 GetPlayerLevel() const { return Level; }
