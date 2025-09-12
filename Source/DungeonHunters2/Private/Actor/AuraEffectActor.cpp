@@ -106,7 +106,8 @@ void AAuraEffectActor::ApplyEffectToTarget(AActor* Target, TSubclassOf<UGameplay
 	//实现：EffectContextHandle.AddSourceObject(this) 将当前 AAuraEffectActor 设为效果来源，后续可通过上下文获取该信息,
 	//	   例如在日志中记录 “治疗光球（AuraEffectActor）为玩家施加了加血效果”）。
 	FGameplayEffectContextHandle EffectContextHandle = TargetASC->MakeEffectContext();
-	EffectContextHandle.AddSourceObject(this); // 记录效果来源是当前 AuraEffectActor
+	// todo 这里有问题
+	EffectContextHandle.AddSourceObject(this); // 记录效果来源是当前 AuraEffectActor 
 	// 4. 生成效果规格并应用到目标
 	// MakeOutgoingSpec 会基于这个 UGameplayEffect 模板，生成一个包含动态参数的 “实例规格”（FGameplayEffectSpec），相当于 “根据模板创建一个具体的执行计划”
 	// Level：效果的等级（代码中是 1.f），用于动态调整效果强度（例如等级 2 的治疗量是等级 1 的 2 倍，模板中可通过 Level 变量定义数值规则）。

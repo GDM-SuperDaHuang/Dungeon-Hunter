@@ -11,6 +11,7 @@ void UAureAbilitySystemComponent::AbilityActorInfoSet()
 	OnGameplayEffectAppliedDelegateToSelf.AddUObject(this,&UAureAbilitySystemComponent::EffectApplied);
 }
 
+// 效果应用时的回调处理
 void UAureAbilitySystemComponent::EffectApplied(UAbilitySystemComponent* AbilitySystemComponent,
                                                 const FGameplayEffectSpec& EffectSpec, FActiveGameplayEffectHandle ActiveEffectHandle)
 {
