@@ -1,12 +1,12 @@
 // daHuang
 
 #pragma once
-
 #include "CoreMinimal.h"
 #include "AbilitySystemComponent.h"
 #include "GameFramework/HUD.h"
 #include "AuraHUD.generated.h"
 
+class UAttributeMenuWidgetController;
 class UOverlayWidgetController;
 class UAuraUserWidget;
 struct FWidgetControllerParams;
@@ -19,16 +19,21 @@ class DUNGEONHUNTERS2_API AAuraHUD : public AHUD
 	GENERATED_BODY()
 
 public:
-	UPROPERTY()
-	TObjectPtr<UAuraUserWidget> OverlayWidget;
+	// UPROPERTY()
+	// TObjectPtr<UAuraUserWidget> OverlayWidget;
 
 	UOverlayWidgetController* GetOverlayWidgetController(const FWidgetControllerParams& WCParams);
 
+	UAttributeMenuWidgetController* GetAttributeMenuWidgetController(const FWidgetControllerParams& WCParams);
+	
 	void  InitOverlay(APlayerController* PC,APlayerState* PS,UAbilitySystemComponent* ASC,UAttributeSet* AS);
 protected:
 
 private:
 
+	UPROPERTY()
+	TObjectPtr<UAuraUserWidget> OverlayWidget;
+	
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UUserWidget> OverlayWidgetClass;
 
@@ -39,4 +44,11 @@ private:
 	//增加灵活性可以处理不同子类的角色类型创建不同的 UOverlayWidgetController 子类
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UOverlayWidgetController> OverlayWidgetControllerClass;
+
+	UPROPERTY()
+	TObjectPtr<UAttributeMenuWidgetController> AttributeMenuWidgetController;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UAttributeMenuWidgetController> UAttributeMenuWidgetControllerClass;
+
 };
