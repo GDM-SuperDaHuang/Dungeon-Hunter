@@ -51,8 +51,8 @@ void AAuraCharacter::InitAbilityActorInfo()
 
 	/***
 	 * 1，将 AurePlayerState和this 中的AttributeSet 和 AbilitySystemComponent 进行绑定
-	 * 传入了PlayerState（作为OwnerActor）
-	 * 当前角色this（作为AvatarActor）
+	 *  传入了PlayerState（作为OwnerActor）
+	 *  当前角色this（作为AvatarActor）
 	 * 2,这时使用GAS修改属性会触发回调 PreAttributeChange，PostGameplayEffectExecute。
 	 */
 

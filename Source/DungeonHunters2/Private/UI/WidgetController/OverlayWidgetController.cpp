@@ -59,7 +59,7 @@ void UOverlayWidgetController::BindCallbacksToDependences()
 								  });
 
 	// .AddUObject(this, &UOverlayWidgetController::MaxManaChanged);
-
+	
 	Cast<UAureAbilitySystemComponent>(AbilitySystemComponent)->EffectAssetTags.AddLambda(
 		[this](const FGameplayTagContainer& AssetTags)
 		{
