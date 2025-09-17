@@ -8,6 +8,9 @@ FAuraGameplayTags FAuraGameplayTags::GameplayTags;
 void FAuraGameplayTags::InitializeNativeGameplayTags()
 {
 	/**
+	 * 方式一：使用cpp定义属性游戏标签
+	 */
+	/**
 	 * Primary
 	 */
 	GameplayTags.Attributes_Primary_Strength = UGameplayTagsManager::Get().AddNativeGameplayTag(

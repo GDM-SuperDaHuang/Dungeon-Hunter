@@ -11,9 +11,9 @@ void UAttributeMenuWidgetController::BindCallbacksToDependences()
 
 void UAttributeMenuWidgetController::BroadcastIntialValues()
 {
-	// UAureAttributeSet* AS = CastChecked<UAureAttributeSet>(AttributeSet);
-	// check(AttributeInfo);
-	// FAuraAttributeInfo Info = AttributeInfo->FindAttributeInfoForTag(FAuraGameplayTags::Get().Attributes_Primary_Strength);
-	// Info.AttributeValue = AS->GetStrength();
-	// AttributeInfoSignature.Broadcast(Info);
+	UAureAttributeSet* AS = CastChecked<UAureAttributeSet>(AttributeSet);
+	check(AttributeInfo);
+	FAuraAttributeInfo Info = AttributeInfo->FindAttributeInfoForTag(FAuraGameplayTags::Get().Attributes_Primary_Strength);
+	Info.AttributeValue = AS->GetStrength();
+	AttributeInfoSignature.Broadcast(Info);
 }
