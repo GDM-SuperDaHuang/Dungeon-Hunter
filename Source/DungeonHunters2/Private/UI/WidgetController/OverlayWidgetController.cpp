@@ -3,7 +3,7 @@
 #include "AbilitySystem/AureAbilitySystemComponent.h"
 #include "AbilitySystem/AureAttributeSet.h"
 
-void UOverlayWidgetController::BroadcastIntialValues()
+void UOverlayWidgetController::BroadcastInitialValues()
 {
 	UAureAttributeSet* AuraAttributeSet = CastChecked<UAureAttributeSet>(AttributeSet);
 
@@ -19,9 +19,9 @@ void UOverlayWidgetController::BroadcastIntialValues()
  * 当属性值发生变化时，会调用对应的回调函数
  * 回调函数会广播属性值的变化，使 UI 能够及时更新
  */
-void UOverlayWidgetController::BindCallbacksToDependences()
+void UOverlayWidgetController::BindCallbacksToDependencies()
 {
-	// Super::BindCallbacksToDependences();
+	// Super::BindCallbacksToDependencies();
 	const UAureAttributeSet* AuraAttributeSet = CastChecked<UAureAttributeSet>(AttributeSet);
 	//绑定属性变化回调 FGameplayAttribute& XxxAttribute
 	//FGameplayAttribute 是 GAS 中用于标识某个具体属性的 “句柄”，它本质上是对 UAttributeSet 中属性的封装（如 UAureAttributeSet 中的 Health 属性）。
