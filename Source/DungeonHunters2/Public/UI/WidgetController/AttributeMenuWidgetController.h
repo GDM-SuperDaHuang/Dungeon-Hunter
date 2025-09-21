@@ -14,19 +14,22 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAttributeInfoSignature, const FAura
 /**
  * 
  */
-UCLASS(BlueprintType,Blueprintable)
+UCLASS(BlueprintType, Blueprintable)
 class DUNGEONHUNTERS2_API UAttributeMenuWidgetController : public UAuraWidgetController
 {
 	GENERATED_BODY()
+
 public:
 	virtual void BindCallbacksToDependencies() override;
 	virtual void BroadcastInitialValues() override;
 
-	UPROPERTY(BlueprintAssignable,Category="GAS|Attributes")
+	UPROPERTY(BlueprintAssignable, Category="GAS|Attributes")
 	FAttributeInfoSignature AttributeInfoDelegate;
 
 protected:
-	
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UAttributeInfo> AttributeInfo;
+
+private:
+	void BroadcastAttributeInfo(const FGameplayTag& AttributeTag, const FGameplayAttribute& Attribute) const;
 };

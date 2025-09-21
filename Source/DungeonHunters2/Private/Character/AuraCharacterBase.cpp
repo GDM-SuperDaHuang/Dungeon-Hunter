@@ -2,8 +2,8 @@
 
 
 #include "Character/AuraCharacterBase.h"
-
-#include <ThirdParty/ShaderConductor/ShaderConductor/External/DirectXShaderCompiler/include/dxc/DXIL/DxilConstants.h>
+#include "AbilitySystemComponent.h"
+#include "AbilitySystem/AureAbilitySystemComponent.h"
 
 AAuraCharacterBase::AAuraCharacterBase()
 {
@@ -43,4 +43,11 @@ void AAuraCharacterBase::InitializeDefaultAbilities() const
 	ApplyEffectToSelf(DefaultPrimaryAbilityEffect, 1.0f);
 	ApplyEffectToSelf(DefaultSecondaryAbilityEffect, 1.0f);
 	ApplyEffectToSelf(DefaultVitalAbilityEffect, 1.0f);
+}
+
+void AAuraCharacterBase::AddCharacterAbilities()
+{
+	UAureAbilitySystemComponent* AureASC = CastChecked<UAureAbilitySystemComponent>(AbilitySystemComponent);
+	if (!HasAuthority()) return;
+	AureASC->AddCharacterAbilities(StartUpAbility);
 }

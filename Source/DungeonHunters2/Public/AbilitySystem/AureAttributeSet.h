@@ -14,6 +14,7 @@ GAMEPLAYATTRIBUTE_VALUE_GETTER(PropertyName) \
 GAMEPLAYATTRIBUTE_VALUE_SETTER(PropertyName) \
 GAMEPLAYATTRIBUTE_VALUE_INITTER(PropertyName)
 
+DECLARE_DELEGATE_RetVal(FGameplayAttribute, FAttributeSignature);
 
 USTRUCT()
 struct FEffectProperties
@@ -28,11 +29,11 @@ struct FEffectProperties
 
 	// 源（施加效果的对象）相关信息
 	UPROPERTY()
-	UAbilitySystemComponent* SourceASC;	// 来源的能力系统组件
+	UAbilitySystemComponent* SourceASC; // 来源的能力系统组件
 	UPROPERTY()
-	AActor* SourceAvatarActor;// 来源的Avatar角色
+	AActor* SourceAvatarActor; // 来源的Avatar角色
 	UPROPERTY()
-	AController* SourceController;// 来源的控制器
+	AController* SourceController; // 来源的控制器
 	UPROPERTY()
 	ACharacter* SourceCharacter; // 来源的角色
 
@@ -40,12 +41,24 @@ struct FEffectProperties
 	UPROPERTY()
 	UAbilitySystemComponent* TargetASC; // 目标的能力系统组件
 	UPROPERTY()
-	AActor* TargetAvatarActor;// 目标的Avatar角色
+	AActor* TargetAvatarActor; // 目标的Avatar角色
 	UPROPERTY()
-	AController* TargetController;// 目标的控制器
+	AController* TargetController; // 目标的控制器
 	UPROPERTY()
-	ACharacter* TargetCharacter;// 目标的角色
+	ACharacter* TargetCharacter; // 目标的角色
 };
+
+//方式一
+//	TMap<FGameplayTag, FGameplayAttribute(*)()> TagsToAttributes;
+
+
+//方式一
+// typedef TBaseStaticDelegateInstance<FGameplayAttribute(), FDefaultDelegateUserPolicy>::FFuncPtr FAttributeFuncPtr;
+//TMap<FGameplayTag, FAttributeFuncPtr> TagsToAttributes;
+
+//方式三
+template <class T>
+using FAttributeFuncPtr = typename TBaseStaticDelegateInstance<T, FDefaultDelegateUserPolicy>::FFuncPtr;
 
 /**
  * 
@@ -66,6 +79,9 @@ public:
 	// 效果执行后的回调（后处理阶段）
 	virtual void PostGameplayEffectExecute(const struct FGameplayEffectModCallbackData& Data) override;
 
+	//方式4
+	// TMap<FGameplayTag, TBaseStaticDelegateInstance<FGameplayAttribute(), FDefaultDelegateUserPolicy>::FFuncPtr> TagsToAttributes;
+	TMap<FGameplayTag, FAttributeFuncPtr<FGameplayAttribute()>> TagsToAttributes;
 
 	/*
 	 * primary Attributes
@@ -120,7 +136,7 @@ public:
 	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_ManaRegeneration, Category="Secondary Attributes")
 	FGameplayAttributeData ManaRegeneration;
 	ATTRIBUTE_ACCESSORS(UAureAttributeSet, ManaRegeneration);
-	
+
 	/*
 	 *vital Attributes
 	 */
@@ -181,7 +197,7 @@ public:
 	void OnRep_HealthRegeneration(const FGameplayAttributeData& OldValue) const;
 	UFUNCTION()
 	void OnRep_ManaRegeneration(const FGameplayAttributeData& OldValue) const;
-	
+
 private:
 	// 设置效果属性 - 提取效果相关的上下文信息
 	void SetEffectProperties(const struct FGameplayEffectModCallbackData& Data, FEffectProperties& props) const;
