@@ -1,7 +1,11 @@
 // daHuang
 // 组件化设计
 #include "Palyer/AuraPlayerController.h"
+
+#include "AbilitySystemBlueprintLibrary.h"
 #include "EnhancedInputSubsystems.h"
+#include "AbilitySystem/AuraAbilitySystemLibrary.h"
+#include "AbilitySystem/AureAbilitySystemComponent.h"
 #include "Input/AuraInputComponent.h"
 #include "Interaction/EnenmyInterface.h"
 
@@ -17,24 +21,24 @@ void AAuraPlayerController::BeginPlay()
 	Super::BeginPlay();
 	//检查是否有绑定，失败则崩溃
 	check(AuraContext);
-	
-	UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer());
+
+	UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(
+		GetLocalPlayer());
 	// check(Subsystem);单人游戏
 	// 将输入映射上下文（AuraContext）添加到子系统，优先级为0（数值越小优先级越高）
-	if (Subsystem)//多人游戏
+	if (Subsystem) //多人游戏
 	{
-		Subsystem->AddMappingContext(AuraContext,0);
+		Subsystem->AddMappingContext(AuraContext, 0);
 	}
-	
 
-	bShowMouseCursor = true;//显示鼠标光标
-	DefaultMouseCursor = EMouseCursor::Default;// 设置默认鼠标光标样式
-	
+
+	bShowMouseCursor = true; //显示鼠标光标
+	DefaultMouseCursor = EMouseCursor::Default; // 设置默认鼠标光标样式
+
 	FInputModeGameAndUI InputModeData;
-	InputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);// 不锁定鼠标到视口
-	InputModeData.SetHideCursorDuringCapture(false);// 捕获输入时不隐藏光标
-	SetInputMode(InputModeData);// 应用输入模式
-	
+	InputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock); // 不锁定鼠标到视口
+	InputModeData.SetHideCursorDuringCapture(false); // 捕获输入时不隐藏光标
+	SetInputMode(InputModeData); // 应用输入模式
 }
 
 void AAuraPlayerController::SetupInputComponent()
@@ -44,8 +48,9 @@ void AAuraPlayerController::SetupInputComponent()
 	UAuraInputComponent* AuraInputComponent = CastChecked<UAuraInputComponent>(InputComponent);
 	check(AuraInputComponent);
 
-	AuraInputComponent->BindAction(MoveAction,ETriggerEvent::Triggered,this,&AAuraPlayerController::Move);
-	AuraInputComponent->BindAbilityActions(InputConfig,this,&ThisClass::AbilityInputTagPressed,&ThisClass::AbilityInputTagReleased,&ThisClass::AbilityInputTagHeld);
+	AuraInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AAuraPlayerController::Move);
+	AuraInputComponent->BindAbilityActions(InputConfig, this, &ThisClass::AbilityInputTagPressed,
+	                                       &ThisClass::AbilityInputTagReleased, &ThisClass::AbilityInputTagHeld);
 }
 
 void AAuraPlayerController::PlayerTick(float DeltaTime)
@@ -58,22 +63,22 @@ void AAuraPlayerController::Move(const FInputActionValue& InputActionValue)
 {
 	const FVector2D InputAxisVecter = InputActionValue.Get<FVector2D>();
 	const FRotator Rotator = GetControlRotation();
-	const FRotator YawRotator(0.f,Rotator.Yaw,0.f);
+	const FRotator YawRotator(0.f, Rotator.Yaw, 0.f);
 
 	const FVector ForwardDirection = FRotationMatrix(YawRotator).GetUnitAxis(EAxis::X);
 	const FVector RightDirection = FRotationMatrix(YawRotator).GetUnitAxis(EAxis::Y);
 
 	if (APawn* PawnController = GetPawn<APawn>())
 	{
-		PawnController->AddMovementInput(ForwardDirection,InputAxisVecter.X);
-		PawnController->AddMovementInput(RightDirection,InputAxisVecter.Y);
+		PawnController->AddMovementInput(ForwardDirection, InputAxisVecter.X);
+		PawnController->AddMovementInput(RightDirection, InputAxisVecter.Y);
 	}
 }
 
 void AAuraPlayerController::CursorTrace()
 {
 	FHitResult CursorHit;
-	GetHitResultUnderCursor(ECC_Visibility,false,CursorHit);
+	GetHitResultUnderCursor(ECC_Visibility, false, CursorHit);
 	if (!CursorHit.bBlockingHit) return;
 	LastActor = ThisActor;
 	ThisActor = Cast<IEnenmyInterface>(CursorHit.GetActor());
@@ -90,61 +95,69 @@ void AAuraPlayerController::CursorTrace()
 	5,两个actor都是有效的，并且是同一个actor
 		-什么都不做
 	 */
-	if (ThisActor!=nullptr)
+	if (ThisActor != nullptr)
 	{
 		printf("");
 	}
-	if (LastActor==nullptr)
+	if (LastActor == nullptr)
 	{
-		if (ThisActor!=nullptr)
+		if (ThisActor != nullptr)
 		{
 			//2
-		this->ThisActor->HighlightActor();	
-		}else
+			this->ThisActor->HighlightActor();
+		}
+		else
 		{
 			//1
 		}
-	}else
+	}
+	else
 	{
-		if (ThisActor==nullptr)//指向当前
+		if (ThisActor == nullptr) //指向当前
 		{
 			//3
 			LastActor->UnHighlightActor();
 		}
 		else
 		{
-			if (ThisActor!=LastActor)
+			if (ThisActor != LastActor)
 			{
 				//4
 				LastActor->UnHighlightActor();
 				ThisActor->HighlightActor();
-			
 			}
 			else
 			{
 				//5
 			}
 		}
-		
-		
-		
 	}
-	
-	
 }
 
 void AAuraPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
 {
-	GEngine->AddOnScreenDebugMessage(1,3,FColor::Red,*InputTag.ToString());
+	GEngine->AddOnScreenDebugMessage(1, 3, FColor::Yellow, *InputTag.ToString());
 }
 
 void AAuraPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 {
-	GEngine->AddOnScreenDebugMessage(2,3,FColor::Red,*InputTag.ToString());
-	
+	if (GetASC()==nullptr) return;
+	GetASC()->AbilityInputTagReleased(InputTag);
+	GEngine->AddOnScreenDebugMessage(2, 3, FColor::Red, *InputTag.ToString());
 }
 
 void AAuraPlayerController::AbilityInputTagHeld(FGameplayTag InputTag)
 {
-	GEngine->AddOnScreenDebugMessage(3,3,FColor::Red,*InputTag.ToString());
+	if (GetASC()==nullptr) return;
+	GetASC()->AbilityInputTagHeld(InputTag);
+	GEngine->AddOnScreenDebugMessage(3, 3, FColor::Green, *InputTag.ToString());
+}
+
+UAureAbilitySystemComponent* AAuraPlayerController::GetASC()
+{
+	if (AureAbilitySystemComponent == nullptr)
+	{
+		AureAbilitySystemComponent = Cast<UAureAbilitySystemComponent>(UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetPawn<APawn>()));
+	}
+	return AureAbilitySystemComponent;
 }

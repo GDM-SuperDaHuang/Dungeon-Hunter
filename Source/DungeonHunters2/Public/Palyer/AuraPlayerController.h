@@ -12,6 +12,7 @@ class UInputMappingContext;
 class UInputAction;
 struct FInputActionValue;
 class IEnenmyInterface;
+class UAureAbilitySystemComponent;
 /**
  * 
  */
@@ -19,17 +20,20 @@ UCLASS()
 class DUNGEONHUNTERS2_API AAuraPlayerController : public APlayerController
 {
 	GENERATED_BODY()
+
 public:
 	AAuraPlayerController();
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
 	virtual void PlayerTick(float DeltaTime) override;
+
 private:
-	UPROPERTY(EditAnywhere,Category="Input")
+	UPROPERTY(EditAnywhere, Category="Input")
 	TObjectPtr<UInputMappingContext> AuraContext;
 
-	UPROPERTY(EditAnywhere,Category="Input")
+	UPROPERTY(EditAnywhere, Category="Input")
 	TObjectPtr<UInputAction> MoveAction;
 
 	void Move(const FInputActionValue& InputActionValue);
@@ -43,7 +47,13 @@ private:
 	void AbilityInputTagReleased(FGameplayTag InputTag);
 	void AbilityInputTagHeld(FGameplayTag InputTag);
 
-	
-	UPROPERTY(EditDefaultsOnly,Category="Input")
+
+	UPROPERTY(EditDefaultsOnly, Category="Input")
 	TObjectPtr<UAuraInputConfig> InputConfig;
+
+	UPROPERTY()
+	TObjectPtr<UAureAbilitySystemComponent> AureAbilitySystemComponent;
+
+	UAureAbilitySystemComponent* GetASC();
+	
 };

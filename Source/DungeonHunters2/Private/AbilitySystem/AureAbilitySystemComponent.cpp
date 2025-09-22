@@ -2,7 +2,7 @@
 
 
 #include "AbilitySystem/AureAbilitySystemComponent.h"
-
+#include "AbilitySystem/Ability/AuraGameplayAbility.h"
 #include "AuraGameplayTags.h"
 
 void UAureAbilitySystemComponent::AbilityActorInfoSet()
@@ -15,12 +15,47 @@ void UAureAbilitySystemComponent::AbilityActorInfoSet()
 
 void UAureAbilitySystemComponent::AddCharacterAbilities(const TArray<TSubclassOf<UGameplayAbility>>& StartUpAbility)
 {
-	for (TSubclassOf<UGameplayAbility> AbilityClass : StartUpAbility)
+	for (const TSubclassOf<UGameplayAbility> AbilityClass : StartUpAbility)
 	{
 		FGameplayAbilitySpec AbilitySpec = FGameplayAbilitySpec(AbilityClass, 1);
-		// GiveAbility(AbilitySpec);
-		GiveAbilityAndActivateOnce(AbilitySpec);
+		if (const UAuraGameplayAbility* AuraAbility = Cast<UAuraGameplayAbility>(AbilitySpec.Ability))
+		{
+			AbilitySpec.DynamicAbilityTags.AddTag(AuraAbility->StartupInputTag);
+			GiveAbility(AbilitySpec);
+		}
 		
+		// GiveAbilityAndActivateOnce(AbilitySpec);
+	}
+}
+
+void UAureAbilitySystemComponent::AbilityInputTagHeld(const FGameplayTag& InputTags)
+{
+	if (!InputTags.IsValid()) return;
+
+	for (FGameplayAbilitySpec AbilitySpec : GetActivatableAbilities())
+	{
+		if (AbilitySpec.DynamicAbilityTags.HasTag(InputTags))
+		{
+			AbilitySpecInputPressed(AbilitySpec);
+			if (!AbilitySpec.IsActive())
+			{
+				TryActivateAbility(AbilitySpec.Handle);
+			}
+		}
+	}
+	
+}
+
+void UAureAbilitySystemComponent::AbilityInputTagReleased(const FGameplayTag& InputTags)
+{
+	if (!InputTags.IsValid()) return;
+
+	for (FGameplayAbilitySpec AbilitySpec : GetActivatableAbilities())
+	{
+		if (AbilitySpec.DynamicAbilityTags.HasTag(InputTags))
+		{
+			AbilitySpecInputReleased(AbilitySpec);
+		}
 	}
 }
 
