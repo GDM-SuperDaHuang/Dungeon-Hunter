@@ -3,9 +3,12 @@
 #include "Palyer/AuraPlayerController.h"
 
 #include "AbilitySystemBlueprintLibrary.h"
+#include "AuraGameplayTags.h"
 #include "EnhancedInputSubsystems.h"
-#include "AbilitySystem/AuraAbilitySystemLibrary.h"
+#include "NavigationPath.h"
+#include "NavigationSystem.h"
 #include "AbilitySystem/AureAbilitySystemComponent.h"
+#include "Components/SplineComponent.h"
 #include "Input/AuraInputComponent.h"
 #include "Interaction/EnenmyInterface.h"
 
@@ -14,6 +17,7 @@ AAuraPlayerController::AAuraPlayerController()
 	//bReplicates = true：
 	//启用网络复制。在多人游戏中，该控制器的状态会从服务器同步到客户端，确保输入和玩家状态在网络中一致。
 	bReplicates = true;
+	Spline = CreateDefaultSubobject<USplineComponent>("Spline");
 }
 
 void AAuraPlayerController::BeginPlay()
@@ -57,7 +61,28 @@ void AAuraPlayerController::PlayerTick(float DeltaTime)
 {
 	Super::PlayerTick(DeltaTime);
 	CursorTrace();
+	AutoRun();
 }
+
+void AAuraPlayerController::AutoRun()
+{
+	if (!bAutoRunning) return;
+	if (APawn* ControlledPawn = GetPawn())
+	{
+		FVector LocationOnSpline = Spline->FindLocationClosestToWorldLocation(
+			ControlledPawn->GetActorLocation(), ESplineCoordinateSpace::World);
+		FVector Direction = Spline->
+			FindDirectionClosestToWorldLocation(LocationOnSpline, ESplineCoordinateSpace::World);
+		ControlledPawn->AddMovementInput(Direction);
+
+		const float DistanceToDestination = (LocationOnSpline - CachedDestination).Length();
+		if (DistanceToDestination <= AutoRunAcceptanceRadius)
+		{
+			bAutoRunning = false;
+		}
+	}
+}
+
 
 void AAuraPlayerController::Move(const FInputActionValue& InputActionValue)
 {
@@ -77,79 +102,161 @@ void AAuraPlayerController::Move(const FInputActionValue& InputActionValue)
 
 void AAuraPlayerController::CursorTrace()
 {
-	FHitResult CursorHit;
+	
 	GetHitResultUnderCursor(ECC_Visibility, false, CursorHit);
 	if (!CursorHit.bBlockingHit) return;
 	LastActor = ThisActor;
 	ThisActor = Cast<IEnenmyInterface>(CursorHit.GetActor());
-	/**
-	从游标开始行跟踪。有几种情况：
-	*1,LastActor是空的&& ThisActor是空
-		-什么都不做
-	2,LastActor是空的&& ThisActor是有效的
-		- Highlight ThisActor
-	3,LastActor是有效的&& ThisActor是空的
-		-取消突出最后一个演员
-	4,两个actor都是有效的，但是LastActor != ThisActor
-		-取消突出LastActor，并突出ThisActor
-	5,两个actor都是有效的，并且是同一个actor
-		-什么都不做
-	 */
-	if (ThisActor != nullptr)
+
+	if (LastActor!=ThisActor)
 	{
-		printf("");
-	}
-	if (LastActor == nullptr)
-	{
-		if (ThisActor != nullptr)
+		if (LastActor)
 		{
-			//2
-			this->ThisActor->HighlightActor();
-		}
-		else
-		{
-			//1
-		}
-	}
-	else
-	{
-		if (ThisActor == nullptr) //指向当前
-		{
-			//3
 			LastActor->UnHighlightActor();
 		}
-		else
+		if (ThisActor)
 		{
-			if (ThisActor != LastActor)
-			{
-				//4
-				LastActor->UnHighlightActor();
-				ThisActor->HighlightActor();
-			}
-			else
-			{
-				//5
-			}
+			ThisActor->HighlightActor();
 		}
 	}
+	// /**
+	// 从游标开始行跟踪。有几种情况：
+	// *1,LastActor是空的&& ThisActor是空
+	// 	-什么都不做
+	// 2,LastActor是空的&& ThisActor是有效的
+	// 	- Highlight ThisActor
+	// 3,LastActor是有效的&& ThisActor是空的
+	// 	-取消突出最后一个演员
+	// 4,两个actor都是有效的，但是LastActor != ThisActor
+	// 	-取消突出LastActor，并突出ThisActor
+	// 5,两个actor都是有效的，并且是同一个actor
+	// 	-什么都不做
+	//  */
+	// if (ThisActor != nullptr)
+	// {
+	// 	printf("");
+	// }
+	// if (LastActor == nullptr)
+	// {
+	// 	if (ThisActor != nullptr)
+	// 	{
+	// 		//2
+	// 		this->ThisActor->HighlightActor();
+	// 	}
+	// 	else
+	// 	{
+	// 		//1
+	// 	}
+	// }
+	// else
+	// {
+	// 	if (ThisActor == nullptr) //指向当前
+	// 	{
+	// 		//3
+	// 		LastActor->UnHighlightActor();
+	// 	}
+	// 	else
+	// 	{
+	// 		if (ThisActor != LastActor)
+	// 		{
+	// 			//4
+	// 			LastActor->UnHighlightActor();
+	// 			ThisActor->HighlightActor();
+	// 		}
+	// 		else
+	// 		{
+	// 			//5
+	// 		}
+	// 	}
+	// }
 }
 
 void AAuraPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
 {
 	GEngine->AddOnScreenDebugMessage(1, 3, FColor::Yellow, *InputTag.ToString());
+
+	if (InputTag.MatchesTagExact(FAuraGameplayTags::Get().InputTag_LMB))
+	{
+		bTargeting = ThisActor ? true : false;
+		bAutoRunning = false;
+	}
 }
 
 void AAuraPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 {
-	if (GetASC()==nullptr) return;
-	GetASC()->AbilityInputTagReleased(InputTag);
+	if (!InputTag.MatchesTagExact(FAuraGameplayTags::Get().InputTag_LMB))
+	{
+		if (GetASC())
+		{
+			GetASC()->AbilityInputTagReleased(InputTag);
+		}
+	}
+
+	if (bTargeting)
+	{
+		if (GetASC())
+		{
+			GetASC()->AbilityInputTagReleased(InputTag);
+		}
+	}
+	else
+	{
+		const APawn* ControlledPawn = GetPawn();
+		if (FollowTime <= ShortPressThreshold && ControlledPawn)
+		{
+			if (UNavigationPath* NavPath = UNavigationSystemV1::FindPathToLocationSynchronously(
+				this, ControlledPawn->GetActorLocation(),
+				CachedDestination))
+			{
+				Spline->ClearSplinePoints();
+				for (FVector PointLoc : NavPath->PathPoints)
+				{
+					Spline->AddSplinePoint(PointLoc, ESplineCoordinateSpace::World);
+					DrawDebugSphere(GetWorld(), PointLoc, 8, 8, FColor::Yellow, false, 5);
+				}
+				CachedDestination = NavPath->PathPoints[NavPath->PathPoints.Num()-1];
+				bAutoRunning = true;
+			}
+		}
+		FollowTime = 0.0f;
+		bTargeting = false;
+	}
 	GEngine->AddOnScreenDebugMessage(2, 3, FColor::Red, *InputTag.ToString());
 }
 
 void AAuraPlayerController::AbilityInputTagHeld(FGameplayTag InputTag)
 {
-	if (GetASC()==nullptr) return;
-	GetASC()->AbilityInputTagHeld(InputTag);
+	if (!InputTag.MatchesTagExact(FAuraGameplayTags::Get().InputTag_LMB))
+	{
+		if (GetASC())
+		{
+			GetASC()->AbilityInputTagHeld(InputTag);
+		}
+	}
+
+	if (bTargeting)
+	{
+		if (GetASC())
+		{
+			GetASC()->AbilityInputTagHeld(InputTag);
+		}
+	}
+	else
+	{
+		FollowTime += GetWorld()->GetDeltaSeconds();
+		// FHitResult Hit;
+		
+		if (CursorHit.bBlockingHit)
+		{
+			CachedDestination = CursorHit.ImpactPoint;
+		}
+		if (APawn* ControlledPawn = GetPawn<APawn>())
+		{
+			const FVector WorldDirection = (CachedDestination - ControlledPawn->GetActorLocation()).GetSafeNormal();
+			ControlledPawn->AddMovementInput(WorldDirection);
+		}
+	}
+
 	GEngine->AddOnScreenDebugMessage(3, 3, FColor::Green, *InputTag.ToString());
 }
 
@@ -157,7 +264,8 @@ UAureAbilitySystemComponent* AAuraPlayerController::GetASC()
 {
 	if (AureAbilitySystemComponent == nullptr)
 	{
-		AureAbilitySystemComponent = Cast<UAureAbilitySystemComponent>(UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetPawn<APawn>()));
+		AureAbilitySystemComponent = Cast<UAureAbilitySystemComponent>(
+			UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetPawn<APawn>()));
 	}
 	return AureAbilitySystemComponent;
 }

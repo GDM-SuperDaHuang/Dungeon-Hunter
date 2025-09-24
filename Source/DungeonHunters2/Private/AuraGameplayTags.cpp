@@ -86,4 +86,8 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 	GameplayTags.InputTag_4 = UGameplayTagsManager::Get().AddNativeGameplayTag(
 	FName(TEXT("InputTag.4")),
 	FString("input tag for 4"));
+
+	GameplayTags.Event_Montage_FireBolt = UGameplayTagsManager::Get().AddNativeGameplayTag(
+	FName(TEXT("Event.Montage.FireBolt")),
+	FString("FireBolt"));
 }
