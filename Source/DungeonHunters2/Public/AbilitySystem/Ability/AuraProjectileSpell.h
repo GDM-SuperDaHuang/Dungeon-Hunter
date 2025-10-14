@@ -36,7 +36,7 @@ protected:
 	 * 负责计算发射位置、生成投射物实例、设置投射物属性（如伤害、速度）
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Projectile")
-	void SpawnProjectile();
+	void SpawnProjectile(const FVector& ProjectileTargetLocation);
 	
 	/**
 	 * 投射物的类模板（在编辑器中指定，如AFireballProjectile、IColdArrowProjectile）
