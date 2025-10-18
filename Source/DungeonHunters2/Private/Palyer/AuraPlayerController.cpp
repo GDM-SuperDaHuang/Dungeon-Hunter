@@ -17,6 +17,7 @@ AAuraPlayerController::AAuraPlayerController()
 	//bReplicates = true：
 	//启用网络复制。在多人游戏中，该控制器的状态会从服务器同步到客户端，确保输入和玩家状态在网络中一致。
 	bReplicates = true;
+	// 创建样条组件，用来记录导航路径点，供 AutoRun 使用
 	Spline = CreateDefaultSubobject<USplineComponent>("Spline");
 }
 
@@ -26,6 +27,7 @@ void AAuraPlayerController::BeginPlay()
 	//检查是否有绑定，失败则崩溃
 	check(AuraContext);
 
+    // 拿到本地玩家的 EnhancedInput 子系统，用于动态挂/卸映射上下文
 	UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(
 		GetLocalPlayer());
 	// check(Subsystem);单人游戏
@@ -39,6 +41,7 @@ void AAuraPlayerController::BeginPlay()
 	bShowMouseCursor = true; //显示鼠标光标
 	DefaultMouseCursor = EMouseCursor::Default; // 设置默认鼠标光标样式
 
+	// 输入模式：既响应游戏（WASD）也响应 UI（点击 Widget）
 	FInputModeGameAndUI InputModeData;
 	InputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock); // 不锁定鼠标到视口
 	InputModeData.SetHideCursorDuringCapture(false); // 捕获输入时不隐藏光标
@@ -49,14 +52,22 @@ void AAuraPlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
 
+	// 我们自定义的 UAuraInputComponent 在 BP 里已经挂载，直接强转
 	UAuraInputComponent* AuraInputComponent = CastChecked<UAuraInputComponent>(InputComponent);
 	check(AuraInputComponent);
 
+	// 普通移动轴绑定
 	AuraInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AAuraPlayerController::Move);
+	// Shift 按下/松开（用来区分“强制施法”与“点地移动”）
 	AuraInputComponent->BindAction(ShiftAction, ETriggerEvent::Started, this, &AAuraPlayerController::ShiftPressed);
 	AuraInputComponent->BindAction(ShiftAction, ETriggerEvent::Completed, this, &AAuraPlayerController::ShiftReleased);
-	AuraInputComponent->BindAbilityActions(InputConfig, this, &ThisClass::AbilityInputTagPressed,
-	                                       &ThisClass::AbilityInputTagReleased, &ThisClass::AbilityInputTagHeld);
+
+	// 一键批量绑定所有“技能输入 Tag”到三个回调
+	AuraInputComponent->BindAbilityActions(
+		InputConfig, // 数据资产里配了 IA <-> Tag 表
+		this,
+		&ThisClass::AbilityInputTagPressed,
+		&ThisClass::AbilityInputTagReleased, &ThisClass::AbilityInputTagHeld);
 }
 
 void AAuraPlayerController::PlayerTick(float DeltaTime)
@@ -66,17 +77,20 @@ void AAuraPlayerController::PlayerTick(float DeltaTime)
 	AutoRun();
 }
 
+// 每帧 Tick 里执行：沿样条移动，直到到达终点
 void AAuraPlayerController::AutoRun()
 {
 	if (!bAutoRunning) return;
 	if (APawn* ControlledPawn = GetPawn())
 	{
+		// 找到离 Pawn 最近的样条点
 		FVector LocationOnSpline = Spline->FindLocationClosestToWorldLocation(
 			ControlledPawn->GetActorLocation(), ESplineCoordinateSpace::World);
 		FVector Direction = Spline->
 			FindDirectionClosestToWorldLocation(LocationOnSpline, ESplineCoordinateSpace::World);
 		ControlledPawn->AddMovementInput(Direction);
 
+		// 到达终点附近则停
 		const float DistanceToDestination = (LocationOnSpline - CachedDestination).Length();
 		if (DistanceToDestination <= AutoRunAcceptanceRadius)
 		{
@@ -88,10 +102,14 @@ void AAuraPlayerController::AutoRun()
 
 void AAuraPlayerController::Move(const FInputActionValue& InputActionValue)
 {
+	// 增强输入默认返回 FVector2D
 	const FVector2D InputAxisVecter = InputActionValue.Get<FVector2D>();
+	
 	const FRotator Rotator = GetControlRotation();
+	// 提取 Yaw 旋转，忽略 Pitch/Roll
 	const FRotator YawRotator(0.f, Rotator.Yaw, 0.f);
 
+	// 把二维输入映射到世界空间的前/右方向
 	const FVector ForwardDirection = FRotationMatrix(YawRotator).GetUnitAxis(EAxis::X);
 	const FVector RightDirection = FRotationMatrix(YawRotator).GetUnitAxis(EAxis::Y);
 
@@ -102,14 +120,17 @@ void AAuraPlayerController::Move(const FInputActionValue& InputActionValue)
 	}
 }
 
-
+/* ---------- 光标扫描 – 高亮敌人 ---------- */
 void AAuraPlayerController::CursorTrace()
 {
+	// 只检测 Visibility 通道；false=不复杂轨迹
 	GetHitResultUnderCursor(ECC_Visibility, false, CursorHit);
 	if (!CursorHit.bBlockingHit) return;
+	// 接口转换：当前/上一帧指向的敌人
 	LastActor = ThisActor;
 	ThisActor = Cast<IEnenmyInterface>(CursorHit.GetActor());
 
+	// 状态变化才调用接口，减少开销
 	if (LastActor != ThisActor)
 	{
 		if (LastActor)
@@ -173,10 +194,12 @@ void AAuraPlayerController::CursorTrace()
 	// }
 }
 
+/* ---------- 6. 技能输入 – 与 GAS 联动 ---------- */
 void AAuraPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
 {
 	GEngine->AddOnScreenDebugMessage(1, 3, FColor::Yellow, *InputTag.ToString());
 
+	// 仅左键需要特殊处理：判断是否指向敌人
 	if (InputTag.MatchesTagExact(FAuraGameplayTags::Get().InputTag_LMB))
 	{
 		bTargeting = ThisActor ? true : false;
@@ -184,8 +207,10 @@ void AAuraPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
 	}
 }
 
+// 松开：区分“短按 / 长按 / 强制施法”三种路线
 void AAuraPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 {
+	// 非左键技能：直接走 ASC 的标准输入释放
 	if (!InputTag.MatchesTagExact(FAuraGameplayTags::Get().InputTag_LMB))
 	{
 		if (GetASC())
@@ -200,11 +225,15 @@ void AAuraPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 		GetASC()->AbilityInputTagReleased(InputTag);
 	}
 	
+	// 左键技能：
+    // 1. 如果处于瞄准状态 或 按住 Shift → 强制施法
+    // 2. 否则判定为“点地移动”：短按就寻路，长按忽略
 	if (!bTargeting && !bShiftKeyDown)
 	{
 		const APawn* ControlledPawn = GetPawn();
 		if (FollowTime <= ShortPressThreshold && ControlledPawn)
 		{
+			// 同步寻路，返回完整路径点
 			if (UNavigationPath* NavPath = UNavigationSystemV1::FindPathToLocationSynchronously(
 				this, ControlledPawn->GetActorLocation(),
 				CachedDestination))
@@ -225,8 +254,10 @@ void AAuraPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 	GEngine->AddOnScreenDebugMessage(2, 3, FColor::Red, *InputTag.ToString());
 }
 
+// 按住：每帧触发；技能需要“蓄力”或“连续发射”时在这里处理
 void AAuraPlayerController::AbilityInputTagHeld(FGameplayTag InputTag)
 {
+	// 非左键：直接转发
 	if (!InputTag.MatchesTagExact(FAuraGameplayTags::Get().InputTag_LMB))
 	{
 		if (GetASC())
@@ -235,6 +266,9 @@ void AAuraPlayerController::AbilityInputTagHeld(FGameplayTag InputTag)
 		}
 	}
 
+	// 左键：
+    // 1. 瞄准 或 Shift → 施法
+    // 2. 否则累计 FollowTime，实时朝鼠标方向移动（类似 Diablo 拖拽）
 	if (bTargeting || bShiftKeyDown)
 	{
 		if (GetASC())
@@ -261,6 +295,7 @@ void AAuraPlayerController::AbilityInputTagHeld(FGameplayTag InputTag)
 	GEngine->AddOnScreenDebugMessage(3, 3, FColor::Green, *InputTag.ToString());
 }
 
+// 懒加载获取 ASC：第一次调用时缓存，失败返回空
 UAureAbilitySystemComponent* AAuraPlayerController::GetASC()
 {
 	if (AureAbilitySystemComponent == nullptr)
