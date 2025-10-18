@@ -192,6 +192,7 @@ void AAuraPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 		{
 			GetASC()->AbilityInputTagReleased(InputTag);
 		}
+		return;
 	}
 
 	if (GetASC())
