@@ -22,11 +22,15 @@ UTargetDataUnderMouse* UTargetDataUnderMouse::CreatTargetDataUnderMouse(UGamepla
  * AbilityTask 的入口，区分本地与远程调用
  * 本地控制：直接采集鼠标位置并发送给服务器
  * 远程（服务器）控制：等待客户端同步过来的 TargetData
+* 如果4个客户端和一个服务器，当一个客户端触发技能时：
+	1，本地客户端（触发技能的客户端）先会执行 Activate()（因为角色是 ROLE_AutonomousProxy，需要处理输入）。
+	2,服务器 会执行 Activate()（因为角色是 ROLE_Authority，需要处理客户端同步的数据并生成火球）。
+	3,而其他 3 个远程客户端 不会执行 该技能的 Activate()，因为它们仅作为旁观者，角色是 ROLE_SimulatedProxy，不参与技能逻辑触发。
  */
 void UTargetDataUnderMouse::Activate()
 {
+	//是否本地的机器
 	const bool bIsLocallyControlled = Ability->GetCurrentActorInfo()->IsLocallyControlled();
-
 	if (bIsLocallyControlled)
 	{
 		SendMouseCursorData();
@@ -39,10 +43,10 @@ void UTargetDataUnderMouse::Activate()
 		
 		// 注册回调：当客户端 TargetData 到达后触发
 		AbilitySystemComponent.Get()->AbilityTargetDataSetDelegate(
-			GetAbilitySpecHandle(), GetActivationPredictionKey()).AddUObject(
+			SpecHandle, ActivationPredictionKey).AddUObject(
 			this, &UTargetDataUnderMouse::OnTargetDataReplicatedCallback);
 
-		// 如果客户端数据已经提前到达，则立即触发；否则 SetWaitingOnRemotePlayerData
+		// 如果客户端数据已经提前到达，则立即触发OnTargetDataReplicatedCallback；否则 SetWaitingOnRemotePlayerData
 		const bool bCalledDelegate = AbilitySystemComponent.Get()->CallReplicatedTargetDataDelegatesIfSet(SpecHandle,ActivationPredictionKey);
 		if (!bCalledDelegate)
 		{
@@ -62,8 +66,14 @@ void UTargetDataUnderMouse::SendMouseCursorData()
 	FScopedPredictionWindow ScopedPrediction(AbilitySystemComponent.Get());
 	// 2. 获取玩家控制器
 	APlayerController* PC = Ability->GetCurrentActorInfo()->PlayerController.Get();
-	// 3. 获取鼠标光标下的命中结果
+	/**
+	 *
+	 *FHitResult 是 （UE）中用于存储碰撞检测结果的核心数据结构，本质是一个 “碰撞信息容器”。
+	 *当引擎执行碰撞查询（如射线检测、胶囊体检测、鼠标光标检测等）时，
+	 *会将所有与碰撞相关的关键信息封装到 FHitResult 中，方便开发者后续使用
+	 */
 	FHitResult CursorHit;
+	// 3. 获取鼠标光标下的命中结果
 	PC->GetHitResultUnderCursor(ECC_Visibility, true, CursorHit);
 
 	

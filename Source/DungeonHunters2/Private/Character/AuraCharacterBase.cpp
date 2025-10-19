@@ -5,14 +5,19 @@
 #include "AbilitySystemComponent.h"
 #include "AbilitySystem/AureAbilitySystemComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "DungeonHunters2/DungeonHunters2.h"
 
 AAuraCharacterBase::AAuraCharacterBase()
 {
 	PrimaryActorTick.bCanEverTick = false;
 
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
+	//这会把角色胶囊体的 GenerateOverlapEvents 标记关掉，从此胶囊他不再触发重叠事件：
+	GetCapsuleComponent()->SetGenerateOverlapEvents(false);
 	GetMesh()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
-
+	GetMesh()->SetCollisionResponseToChannel(ECC_Projectile,ECR_Overlap);
+	GetMesh()->SetGenerateOverlapEvents(true);
+	
 	Weapon = CreateDefaultSubobject<USkeletalMeshComponent>("Weapon");
 	Weapon->SetupAttachment(GetMesh(), FName(TEXT("WeaponHandSocket")));
 	Weapon->SetCollisionEnabled(ECollisionEnabled::NoCollision);

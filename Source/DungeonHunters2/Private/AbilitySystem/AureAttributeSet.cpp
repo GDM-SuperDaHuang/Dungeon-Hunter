@@ -156,6 +156,7 @@ void UAureAttributeSet::PostGameplayEffectExecute(const struct FGameplayEffectMo
 	{
 		// 限制Health在0到MaxHealth之间
 		SetHealth(FMath::Clamp(GetHealth(), 0.0f, GetMaxHealth()));
+		UE_LOG(LogTemp, Warning, TEXT("Health Changed on %s ,Health: %f"),*Props.TargetAvatarActor->GetName(),GetHealth());
 	}
 
 	if (Data.EvaluatedData.Attribute == GetManaAttribute())

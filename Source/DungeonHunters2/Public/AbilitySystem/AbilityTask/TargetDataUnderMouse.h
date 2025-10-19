@@ -27,8 +27,12 @@ public:
 		meta=(DisplayName = "TargetDataUnderMouse", HidePin = "OwningAbility", DefaultToSelf = "OwningAbility",
 			BlueprintInternalUseOnly = "true"))
 	static UTargetDataUnderMouse* CreatTargetDataUnderMouse(UGameplayAbility* OwningAbility);
-
-
+	
+	/**
+	 * 因为蓝图节点帮你提前把 FGameplayAbilityTargetDataHandle 拆包成 FHitResult，
+	 * 再把 FHitResult 拆成 Vector 的 Location，所以看起来像是“直接输出 Vector”，
+	 * 但实际上委托签名永远是 FGameplayAbilityTargetDataHandle —— 只是 Epic 给你包了一层“糖衣”。
+	 */
 	UPROPERTY(BlueprintAssignable)
 	FMouseTargetDataSignature ValidData;
 
