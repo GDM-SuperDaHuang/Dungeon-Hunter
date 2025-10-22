@@ -4,6 +4,7 @@
 #include "Character/AuraEnemy.h"
 
 #include "AbilitySystemComponent.h"
+#include "AbilitySystem/AuraAbilitySystemLibrary.h"
 #include "AbilitySystem/AureAbilitySystemComponent.h"
 #include "AbilitySystem/AureAttributeSet.h"
 #include "DungeonHunters2/DungeonHunters2.h"
@@ -83,4 +84,10 @@ void AAuraEnemy::InitAbilityActorInfo()
 	Cast<UAureAbilitySystemComponent>(AbilitySystemComponent)->AbilityActorInfoSet();
 
 	InitializeDefaultAbilities();
+}
+
+void AAuraEnemy::InitializeDefaultAbilities() const
+{
+	UAuraAbilitySystemLibrary::InitializeDefaultAttributes(this,CharacterClass,Level,AbilitySystemComponent);
+	
 }
