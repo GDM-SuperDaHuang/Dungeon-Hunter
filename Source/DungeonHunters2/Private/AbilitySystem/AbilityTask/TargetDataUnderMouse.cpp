@@ -81,7 +81,7 @@ void UTargetDataUnderMouse::SendMouseCursorData()
 	FGameplayAbilityTargetDataHandle DataHandle;
 	FGameplayAbilityTargetData_SingleTargetHit* Data = new FGameplayAbilityTargetData_SingleTargetHit();
 	Data->HitResult = CursorHit;
-	DataHandle.Add(Data);
+	DataHandle.Add(Data);//← 这里把裸指针交出去
 
 	// ValidData.Broadcast(CursorHit.Location);
 	
