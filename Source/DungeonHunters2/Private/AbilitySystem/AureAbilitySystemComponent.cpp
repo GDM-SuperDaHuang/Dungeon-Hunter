@@ -34,6 +34,14 @@ void UAureAbilitySystemComponent::AddCharacterAbilities(const TArray<TSubclassOf
 		{
 			// 把输入标签塞进 DynamicAbilityTags，后续输入系统按标签检索
 			AbilitySpec.DynamicAbilityTags.AddTag(AuraAbility->StartupInputTag);
+
+			/**
+			 * GiveAbility
+			 * 1. 生成全局唯一 Handle （通常一种技能一个）
+			 * 2. 实例化 GA 对象（CDO → 实例）
+			 * 3. 塞进 ActiveAbilitySpecs 数组
+			 * 4. 标记网络脏，客户端会收到复制包并本地生成影子 Spec
+			 */
 			GiveAbility(AbilitySpec);// 真正交给 ASC 管理
 		}
 		
@@ -52,7 +60,7 @@ void UAureAbilitySystemComponent::AbilityInputTagHeld(const FGameplayTag& InputT
 	// GetActivatableAbilities() 返回当前可被激活的技能 Spec
 	for (FGameplayAbilitySpec AbilitySpec : GetActivatableAbilities())
 	{
-		
+		//查找 AbilitySpec.DynamicAbilityTags.AddTag(AuraAbility->StartupInputTag); 之前存进的标签 
 		if (AbilitySpec.DynamicAbilityTags.HasTag(InputTags))
 		{
 			// 标记“输入按下”状态，用于冷却、消耗等预判
@@ -60,7 +68,7 @@ void UAureAbilitySystemComponent::AbilityInputTagHeld(const FGameplayTag& InputT
 			// 如果技能没激活，则尝试激活（服务器仲裁）
 			if (!AbilitySpec.IsActive())
 			{
-				TryActivateAbility(AbilitySpec.Handle);
+				TryActivateAbility(AbilitySpec.Handle);//释放技能
 			}
 		}
 	}

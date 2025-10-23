@@ -11,6 +11,12 @@
 
 AAuraEnemy::AAuraEnemy()
 {
+	/**
+	 * ASC与AttributeSet自动绑定的触发时机，CreateDefaultSubobject
+	 * ASC 作为Actor(AAuraEnemy) 的子对象,UAureAttributeSet 作为 Actor(AAuraEnemy) 的子对象
+	 * 引擎调用 UAbilitySystemComponent::InitializeComponent() 时会：
+	 * 		--遍历 Owner 的所有子对象,发现是 UAttributeSet 派生类 → 执行
+	 */
 	// todo  缺失？ bReplicates = true;
 
 	// 让网格体阻挡 Visibility 通道，便于鼠标检测

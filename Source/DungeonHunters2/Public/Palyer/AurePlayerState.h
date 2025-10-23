@@ -11,8 +11,20 @@ class UAbilitySystemComponent;
 class UAttributeSet;
 
 /**
+ * 1,ACharacter / Pawn
+ * 由 Level 场景 或 运行时 SpawnActor 生成 → 属于 World 上下文，换地图、死亡、卸载流关卡时会被 Destroy。
+ * 
+ * 2,APlayerState
+ * 由 GameMode::Login() 主动 SpawnActor 生成 → 不与任何 ULevel 绑定，独立于地图存在。
+ * 销毁权在 GameMode
+ * 
+ * 对象				|生命周期管理者		|地图切换	|死亡/卸载	|玩家重连
+ * Character/Pawn	|World			  |销毁		  |销毁	 	 |重新生成
+ * PlayerController	|GameMode		  |迁移		  |保留	 	 |重新关联
+ * PlayerState		|GameMode		  |迁移		  |保留	 	 |原对象仍在
  * 
  */
+
 UCLASS()
 class DUNGEONHUNTERS2_API AAurePlayerState : public APlayerState, public IAbilitySystemInterface
 {
