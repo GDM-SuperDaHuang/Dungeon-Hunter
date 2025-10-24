@@ -58,7 +58,8 @@ void AAuraCharacter::InitAbilityActorInfo()
 
 	/***
 	 * 2. 绑定 Owner = PS，Avatar = 自身 Character
-	 * 
+	 * 		Owner = PlayerState（持久存在）
+	 *	 	Avatar = Character（可能死亡/换图）
 	 * 1，将 AurePlayerState和this 中的AttributeSet 和 AbilitySystemComponent 进行绑定
 	 *  传入了PlayerState（作为OwnerActor）
 	 *  当前角色this（作为AvatarActor）

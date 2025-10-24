@@ -9,6 +9,7 @@
 /**
  * 项目中所有技能的基类，扩展自UGameplayAbility，主要用于关联输入与技能
  * 核心功能：通过GameplayTag实现技能与输入的解耦，方便灵活绑定不同输入（如鼠标、键盘）
+ * GiveAbility(Spec);--> DynamicAbilityTags 会被 复制到客户端影子 ASC。
  */
 UCLASS()
 class DUNGEONHUNTERS2_API UAuraGameplayAbility : public UGameplayAbility

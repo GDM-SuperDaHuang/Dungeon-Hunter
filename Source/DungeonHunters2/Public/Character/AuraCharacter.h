@@ -16,7 +16,9 @@ class DUNGEONHUNTERS2_API AAuraCharacter : public AAuraCharacterBase
 
 public:
 	AAuraCharacter();
+	// 服务器
 	virtual void PossessedBy(AController* NewController) override;
+	// 客户端
 	virtual void OnRep_PlayerState() override;
 
 	/**combat Interface*/
