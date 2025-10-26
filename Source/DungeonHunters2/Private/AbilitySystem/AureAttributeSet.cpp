@@ -50,6 +50,16 @@ void UAureAttributeSet::GetLifetimeReplicatedProps(TArray<class FLifetimePropert
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
+	/**
+	 * DOREPLIFETIME_CONDITION_NOTIFY 参数
+	 * 1.当前类名
+	 * 2.属性名
+	 * 3.复制条件（COND_None/COND_OwnerOnly/COND_SkipOwner 等）
+	 * 
+	 * 4.通知策略（REPNOTIFY_Always/REPNOTIFY_OnChanged）
+	 * 		– REPNOTIFY_OnChanged（默认值改变才触发）
+	 * 		– REPNOTIFY_Always（只要收到包就触发，用于预测回滚）
+	 */
 	//primary Attributes
 	DOREPLIFETIME_CONDITION_NOTIFY(UAureAttributeSet, Strength, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(UAureAttributeSet, Intelligence, COND_None, REPNOTIFY_Always);
@@ -72,7 +82,7 @@ void UAureAttributeSet::GetLifetimeReplicatedProps(TArray<class FLifetimePropert
 	DOREPLIFETIME_CONDITION_NOTIFY(UAureAttributeSet, Mana, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(UAureAttributeSet, MaxMana, COND_None, REPNOTIFY_Always);
 }
-
+/* ---------- 属性即将被修改 ---------- */
 //执行时机是属性值即将被修改但尚未实际更新到 FGameplayAttributeData 之前
 void UAureAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue)
 {
@@ -98,6 +108,8 @@ void UAureAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, 
 	}
 }
 
+
+/* ---------- 工具：提取上下文 ---------- */
 void UAureAttributeSet::SetEffectProperties(const struct FGameplayEffectModCallbackData& Data,
                                             FEffectProperties& props) const
 {
@@ -143,6 +155,7 @@ void UAureAttributeSet::SetEffectProperties(const struct FGameplayEffectModCallb
 	}
 }
 
+/* ---------- GE 执行完毕 ---------- */
 void UAureAttributeSet::PostGameplayEffectExecute(const struct FGameplayEffectModCallbackData& Data)
 {
 	Super::PostGameplayEffectExecute(Data);
@@ -198,10 +211,16 @@ void UAureAttributeSet::PostGameplayEffectExecute(const struct FGameplayEffectMo
  * 属性复制回调函数
  * 当属性通过网络复制时调用
  * 主要用于处理客户端接收到新属性值后的逻辑
+ * GAMEPLAYATTRIBUTE_REPNOTIFY 为专供 FGameplayAttributeData 的 OnRep 实现宏；
+ * GAS 专用” 的 OnRep 实现，负责 值同步 + 预测回滚
  ******************************************/
 
 void UAureAttributeSet::OnRep_Health(const FGameplayAttributeData& OldHealth) const
 {
+	/**
+	 * 把 OldHealth 登记到 ASC 的 PredictionRollback 表
+	 * 把 当前值 更新为 网络新值（ASC 内部缓存）
+	 */
 	GAMEPLAYATTRIBUTE_REPNOTIFY(UAureAttributeSet, Health, OldHealth);
 }
 

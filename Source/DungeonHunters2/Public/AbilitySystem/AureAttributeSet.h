@@ -7,7 +7,7 @@
 #include "AbilitySystemComponent.h"
 #include "AureAttributeSet.generated.h"
 
-//生成getter、setter函数
+//生成getter、setter、Init 函数
 #define ATTRIBUTE_ACCESSORS(ClassName, PropertyName) \
 GAMEPLAYATTRIBUTE_PROPERTY_GETTER(ClassName, PropertyName) \
 GAMEPLAYATTRIBUTE_VALUE_GETTER(PropertyName) \
@@ -166,6 +166,7 @@ public:
 	/**
 	 * call black
 	 */
+	/* ========== 网络复制回调 ========== */
 	UFUNCTION()
 	void OnRep_Health(const FGameplayAttributeData& OldHealth) const;
 

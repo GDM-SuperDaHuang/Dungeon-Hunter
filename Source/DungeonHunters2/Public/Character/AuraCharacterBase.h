@@ -61,6 +61,7 @@ protected:
 	void AddCharacterAbilities();
 private:
 
+	//技能列表
 	UPROPERTY(EditAnywhere, Category="Abilities")
 	TArray<TSubclassOf<UGameplayAbility>> StartUpAbility;
 
