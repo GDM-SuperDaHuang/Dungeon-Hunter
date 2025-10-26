@@ -4,10 +4,12 @@
 #include "Character/AuraEnemy.h"
 
 #include "AbilitySystemComponent.h"
+#include "AuraGameplayTags.h"
 #include "AbilitySystem/AuraAbilitySystemLibrary.h"
 #include "AbilitySystem/AureAbilitySystemComponent.h"
 #include "AbilitySystem/AureAttributeSet.h"
 #include "DungeonHunters2/DungeonHunters2.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 AAuraEnemy::AAuraEnemy()
 {
@@ -44,18 +46,19 @@ int32 AAuraEnemy::GetPlayerLevel()
 	return Level;
 }
 
+
 void AAuraEnemy::BeginPlay()
 {
 	Super::BeginPlay();
+	GetCharacterMovement()->MaxWalkSpeed = BaseWalkSpeed;
 	InitAbilityActorInfo();
+	UAuraAbilitySystemLibrary::GiveStartupAbilities(this,AbilitySystemComponent);
+
 	if (UAuraUserWidget* AuraUserWidget = Cast<UAuraUserWidget>(HealthBar->GetUserWidgetObject()))
 	{
 		AuraUserWidget->SetWidgetController(this);
 	}
-	
-	
-	
-	
+
 	if (const UAureAttributeSet* AureAS = Cast<UAureAttributeSet>(AttributeSet))
 	{
 		AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AureAS->GetHealthAttribute()).AddLambda(
@@ -72,9 +75,24 @@ void AAuraEnemy::BeginPlay()
 			}
 		);
 
+		AbilitySystemComponent->RegisterGameplayTagEvent(FAuraGameplayTags::Get().Effects_HitReact,
+		                                                 EGameplayTagEventType::NewOrRemoved).AddUObject(
+			this,
+			&AAuraEnemy::HitReactTagChanged
+		);
 		OnHealthChanged.Broadcast(AureAS->GetHealth());
 		OnMaxHealthChanged.Broadcast(AureAS->GetMaxHealth());
 	};
+}
+
+void AAuraEnemy::HitReactTagChanged(const FGameplayTag CallbackTag, int32 NewCount)
+{
+	bHitReacting = NewCount > 0;
+	//击中后，停止移动
+	GetCharacterMovement()->MaxWalkSpeed = bHitReacting ? 0.0f : BaseWalkSpeed;
+	if (NewCount > 0)
+	{
+	}
 }
 
 void AAuraEnemy::InitAbilityActorInfo()
@@ -88,6 +106,5 @@ void AAuraEnemy::InitAbilityActorInfo()
 
 void AAuraEnemy::InitializeDefaultAbilities() const
 {
-	UAuraAbilitySystemLibrary::InitializeDefaultAttributes(this,CharacterClass,Level,AbilitySystemComponent);
-	
+	UAuraAbilitySystemLibrary::InitializeDefaultAttributes(this, CharacterClass, Level, AbilitySystemComponent);
 }

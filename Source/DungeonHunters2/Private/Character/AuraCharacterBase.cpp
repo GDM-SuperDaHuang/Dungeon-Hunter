@@ -28,6 +28,11 @@ UAbilitySystemComponent* AAuraCharacterBase::GetAbilitySystemComponent() const
 	return AbilitySystemComponent;
 }
 
+UAnimMontage* AAuraCharacterBase::GetHitReactMontage_Implementation()
+{
+	return HitReactMontage;
+}
+
 void AAuraCharacterBase::BeginPlay()
 {
 	Super::BeginPlay();
@@ -66,4 +71,6 @@ void AAuraCharacterBase::AddCharacterAbilities()
 	UAureAbilitySystemComponent* AureASC = CastChecked<UAureAbilitySystemComponent>(AbilitySystemComponent);
 	if (!HasAuthority()) return;
 	AureASC->AddCharacterAbilities(StartUpAbility);
+
+	
 }

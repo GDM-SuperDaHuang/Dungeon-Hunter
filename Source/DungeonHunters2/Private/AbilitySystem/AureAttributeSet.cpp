@@ -8,6 +8,7 @@
 #include "GameFramework/Character.h"
 #include "Net/UnrealNetwork.h"
 #include "AuraGameplayTags.h"
+
 UAureAttributeSet::UAureAttributeSet()
 {
 	//属性宏产生
@@ -17,7 +18,7 @@ UAureAttributeSet::UAureAttributeSet()
 	// InitMaxMana(150.f);
 
 	const FAuraGameplayTags GameplayTags = FAuraGameplayTags::Get();
-	
+
 	// FAttributeSignature StrengthDelegate;
 	// StrengthDelegate.BindStatic(GetStrengthAttribute);
 	// TagsToAttributes.Add(GameplayTags.Attributes_Primary_Strength, StrengthDelegate);
@@ -34,7 +35,7 @@ UAureAttributeSet::UAureAttributeSet()
 
 	/* secondary */
 	TagsToAttributes.Add(GameplayTags.Attributes_Secondary_Armor, GetArmorAttribute);
-	TagsToAttributes.Add(GameplayTags.Attributes_Secondary_ArmorPenetration,GetArmorPenetrationAttribute);
+	TagsToAttributes.Add(GameplayTags.Attributes_Secondary_ArmorPenetration, GetArmorPenetrationAttribute);
 	TagsToAttributes.Add(GameplayTags.Attributes_Secondary_BlockChance, GetBlockChanceAttribute);
 	TagsToAttributes.Add(GameplayTags.Attributes_Secondary_CriticalHitChance, GetCriticalHitChanceAttribute);
 	TagsToAttributes.Add(GameplayTags.Attributes_Secondary_CriticalHitDamage, GetCriticalHitDamageAttribute);
@@ -43,7 +44,6 @@ UAureAttributeSet::UAureAttributeSet()
 	TagsToAttributes.Add(GameplayTags.Attributes_Secondary_ManaRegeneration, GetManaRegenerationAttribute);
 	TagsToAttributes.Add(GameplayTags.Attributes_Secondary_MaxHealth, GetMaxHealthAttribute);
 	TagsToAttributes.Add(GameplayTags.Attributes_Secondary_MaxMana, GetMaxManaAttribute);
-
 }
 
 void UAureAttributeSet::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
@@ -55,7 +55,7 @@ void UAureAttributeSet::GetLifetimeReplicatedProps(TArray<class FLifetimePropert
 	DOREPLIFETIME_CONDITION_NOTIFY(UAureAttributeSet, Intelligence, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(UAureAttributeSet, Resilience, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(UAureAttributeSet, Vigor, COND_None, REPNOTIFY_Always);
-	
+
 	//secondary Attributes
 	DOREPLIFETIME_CONDITION_NOTIFY(UAureAttributeSet, Armor, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(UAureAttributeSet, ArmorPenetration, COND_None, REPNOTIFY_Always);
@@ -71,11 +71,8 @@ void UAureAttributeSet::GetLifetimeReplicatedProps(TArray<class FLifetimePropert
 	DOREPLIFETIME_CONDITION_NOTIFY(UAureAttributeSet, MaxHealth, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(UAureAttributeSet, Mana, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(UAureAttributeSet, MaxMana, COND_None, REPNOTIFY_Always);
-
-	
-	
-	
 }
+
 //执行时机是属性值即将被修改但尚未实际更新到 FGameplayAttributeData 之前
 void UAureAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue)
 {
@@ -101,7 +98,8 @@ void UAureAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, 
 	}
 }
 
-void UAureAttributeSet::SetEffectProperties(const struct FGameplayEffectModCallbackData& Data, FEffectProperties& props) const
+void UAureAttributeSet::SetEffectProperties(const struct FGameplayEffectModCallbackData& Data,
+                                            FEffectProperties& props) const
 {
 	// 1. 获取效果上下文
 	props.EffectContextHandle = Data.EffectSpec.GetContext();
@@ -109,7 +107,8 @@ void UAureAttributeSet::SetEffectProperties(const struct FGameplayEffectModCallb
 	props.SourceASC = props.EffectContextHandle.GetOriginalInstigatorAbilitySystemComponent();
 
 	// 3. 获取源相关信息
-	if (IsValid(props.SourceASC) && props.SourceASC->AbilityActorInfo.IsValid() && props.SourceASC->AbilityActorInfo->AvatarActor.IsValid())
+	if (IsValid(props.SourceASC) && props.SourceASC->AbilityActorInfo.IsValid() && props.SourceASC->AbilityActorInfo->
+		AvatarActor.IsValid())
 	{
 		// 源Avatar角色（通常是角色实例）
 		props.SourceAvatarActor = props.SourceASC->AbilityActorInfo->AvatarActor.Get();
@@ -149,19 +148,36 @@ void UAureAttributeSet::PostGameplayEffectExecute(const struct FGameplayEffectMo
 	Super::PostGameplayEffectExecute(Data);
 	// 创建效果属性结构并填充数据
 	FEffectProperties Props;
-	SetEffectProperties(Data, Props);// 解析效果的源和目标信息
+	SetEffectProperties(Data, Props); // 解析效果的源和目标信息
 
 	// 生命值处理：确保在效果应用后仍然在合法范围内
 	if (Data.EvaluatedData.Attribute == GetHealthAttribute())
 	{
 		// 限制Health在0到MaxHealth之间
 		SetHealth(FMath::Clamp(GetHealth(), 0.0f, GetMaxHealth()));
-		UE_LOG(LogTemp, Warning, TEXT("Health Changed on %s ,Health: %f"),*Props.TargetAvatarActor->GetName(),GetHealth());
+		UE_LOG(LogTemp, Warning, TEXT("Health Changed on %s ,Health: %f"), *Props.TargetAvatarActor->GetName(),
+		       GetHealth());
 	}
 
 	if (Data.EvaluatedData.Attribute == GetManaAttribute())
 	{
 		SetMana(FMath::Clamp(GetMana(), 0.0f, GetMaxMana()));
+	}
+
+	if (Data.EvaluatedData.Attribute == GetIncomingDamageAttribute())
+	{
+		const float LocalIncomingDamage = GetIncomingDamage();
+		SetIncomingDamage(0);
+		if (LocalIncomingDamage > 0)
+		{
+			const float NewHealth = GetHealth() - LocalIncomingDamage;
+			SetHealth(FMath::Clamp(NewHealth, 0.0f, GetMaxHealth()));
+			const float bFatal = NewHealth <= 0.f;
+			if (!bFatal)
+			{
+				
+			}
+		}
 	}
 
 	if (Data.EvaluatedData.Attribute == GetHealthAttribute())

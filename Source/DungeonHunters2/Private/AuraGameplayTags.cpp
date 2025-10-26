@@ -90,4 +90,12 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 	GameplayTags.Event_Montage_FireBolt = UGameplayTagsManager::Get().AddNativeGameplayTag(
 	FName(TEXT("Event.Montage.FireBolt")),
 	FString("FireBolt"));
+
+	GameplayTags.Damage = UGameplayTagsManager::Get().AddNativeGameplayTag(
+	FName(TEXT("Damage")),
+	FString("Damage"));
+
+	GameplayTags.Effects_HitReact = UGameplayTagsManager::Get().AddNativeGameplayTag(
+	FName(TEXT("Effects.HitReact")),
+	FString("Effects.HitReact"));
 }

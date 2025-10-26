@@ -42,6 +42,11 @@ public:
 
 	FGameplayTag Event_Montage_FireBolt;
 
+	FGameplayTag Damage;
+
+	FGameplayTag Effects_HitReact;
+
+
 
 protected:
 

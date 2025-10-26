@@ -21,8 +21,8 @@ UCLASS()
 class DUNGEONHUNTERS2_API UAuraAbilitySystemLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
+
 public:
-	
 	UFUNCTION(BlueprintPure, Category = "AuraAbilitySystemLibrary|WidgetController")
 	static UOverlayWidgetController* GetOverlayWidgetController(const UObject* WorldContextObject);
 
@@ -30,5 +30,9 @@ public:
 	static UAttributeMenuWidgetController* GetAttributeMenuWidgetController(const UObject* WorldContextObject);
 
 	UFUNCTION(BlueprintCallable, Category = "AuraAbilitySystemLibrary|CharacterDefaultAttributes")
-	static void InitializeDefaultAttributes(const UObject* WorldContextObject,ECharacterClass CharacterClass,float Level,UAbilitySystemComponent* ASC);
+	static void InitializeDefaultAttributes(const UObject* WorldContextObject, ECharacterClass CharacterClass,
+	                                        float Level, UAbilitySystemComponent* ASC);
+
+	UFUNCTION(BlueprintCallable, Category = "AuraAbilitySystemLibrary|CharacterDefaultAttributes")
+	static void GiveStartupAbilities(const UObject* WorldContextObject, UAbilitySystemComponent* ASC);
 };
