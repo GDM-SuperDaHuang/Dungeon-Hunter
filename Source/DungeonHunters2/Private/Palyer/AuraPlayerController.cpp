@@ -105,9 +105,10 @@ void AAuraPlayerController::Move(const FInputActionValue& InputActionValue)
 	// 增强输入默认返回 FVector2D
 	const FVector2D InputAxisVecter = InputActionValue.Get<FVector2D>();
 	
+	//返回 摄像机或控制器 的 世界旋转
 	const FRotator Rotator = GetControlRotation();
 	// 提取 Yaw 旋转，忽略 Pitch/Roll
-	const FRotator YawRotator(0.f, Rotator.Yaw, 0.f);
+	const FRotator YawRotator(0.f, Rotator.Yaw, 0.f);//水平面朝向（俯仰角清零），防止 上坡/下坡 时 前后方向错位。
 
 	// 把二维输入映射到世界空间的前/右方向
 	const FVector ForwardDirection = FRotationMatrix(YawRotator).GetUnitAxis(EAxis::X);

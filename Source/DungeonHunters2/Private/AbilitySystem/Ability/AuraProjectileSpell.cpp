@@ -47,6 +47,10 @@ void UAuraProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocati
 
 
 		// 延迟生成投射物（Deferred Spawn）：先创建实例但不初始化，可在初始化前设置属性
+		/**
+		 * SpawnActor → 碰撞体立即生效 → 可能 与生成者重叠 → 引擎报错。
+		 * SpawnActorDeferred → 碰撞体、组件、BeginPlay 都不激活 → 给你时间 设置属性 → 再 Finish。
+		 */
 		AAuraProjectile* Projectile = GetWorld()->SpawnActorDeferred<AAuraProjectile>(
 			ProjectileClass,
 			SpawnTransform,
@@ -54,11 +58,13 @@ void UAuraProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocati
 			Cast<APawn>(GetOwningActorFromActorInfo()),
 			ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
 
+		//伤害计算
 		const UAbilitySystemComponent* SourceASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(
 			GetAvatarActorFromActorInfo());\
 		const FGameplayEffectSpecHandle SpecHandle = SourceASC->MakeOutgoingSpec(
 			DamageEffectClass, GetAbilityLevel(), SourceASC->MakeEffectContext());
 		FAuraGameplayTags GameplayTags = FAuraGameplayTags::Get();
+		// 根据配置表等级获取对应的伤害值
 		const float ScaledDame = Damage.GetValueAtLevel(GetAbilityLevel());
 		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, FString::Printf(TEXT("Damage: %f"),ScaledDame));
 
@@ -66,7 +72,7 @@ void UAuraProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocati
 		Projectile->DamageEffectHandle = SpecHandle;
 
 
-		// 完成投射物生成（应用之前的设置，触发Actor的BeginPlay）
+		// SpawnActorDeferred需要FinishSpawning， 完成投射物生成（应用之前的设置，触发AAuraProjectile的BeginPlay）
 		Projectile->FinishSpawning(SpawnTransform);
 	};
 }
