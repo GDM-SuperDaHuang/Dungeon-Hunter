@@ -188,7 +188,9 @@ void UAureAttributeSet::PostGameplayEffectExecute(const struct FGameplayEffectMo
 			const float bFatal = NewHealth <= 0.f;
 			if (!bFatal)
 			{
-				
+				FGameplayTagContainer TagContainer;
+				TagContainer.AddTag(FAuraGameplayTags::Get().Effects_HitReact);
+				Props.TargetASC->TryActivateAbilitiesByTag(TagContainer);
 			}
 		}
 	}

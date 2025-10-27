@@ -15,7 +15,8 @@ class UGameplayAbility;
 class UGameplayEffect;
 
 UCLASS(Abstract)
-class DUNGEONHUNTERS2_API AAuraCharacterBase : public ACharacter, public IAbilitySystemInterface, public ICombatInterface
+class DUNGEONHUNTERS2_API AAuraCharacterBase : public ACharacter, public IAbilitySystemInterface,
+                                               public ICombatInterface
 {
 	GENERATED_BODY()
 
@@ -25,13 +26,17 @@ public:
 	UAttributeSet* GetAttributeSet() const { return AttributeSet; }
 
 	virtual UAnimMontage* GetHitReactMontage_Implementation() override;
+	virtual void Die() override;
+
+	UFUNCTION(NetMulticast, Reliable)
+	virtual void MulticastHandleDeath();
 protected:
 	virtual void BeginPlay() override;
 
-	UPROPERTY(EditAnywhere, Category="Combat") 
+	UPROPERTY(EditAnywhere, Category="Combat")
 	TObjectPtr<USkeletalMeshComponent> Weapon;
 
-	UPROPERTY(EditAnywhere, Category="Combat") 
+	UPROPERTY(EditAnywhere, Category="Combat")
 	FName WeaponTipSocketName;
 
 	virtual FVector GetCombatSocketLocation() override;
@@ -59,8 +64,8 @@ protected:
 	virtual void InitializeDefaultAbilities() const;
 
 	void AddCharacterAbilities();
-private:
 
+private:
 	//技能列表
 	UPROPERTY(EditAnywhere, Category="Abilities")
 	TArray<TSubclassOf<UGameplayAbility>> StartUpAbility;
