@@ -93,6 +93,7 @@ void UAureAbilitySystemComponent::AbilityInputTagReleased(const FGameplayTag& In
 }
 
 /**
+ * 因为 UFUNCTION(Client, Reliable)的缘故，只会让其中一个客户端发生回调。
  * 只要 权威端 通过 任何 ApplyGameplayEffect 接口* 把 带 AssetTag 的 GE 施加到 目标 ASC，就会 在网络包到达客户端时 由 引擎复制系统 自动触发 ClientEffectApplied_Implementation
  * 如，
  * ASC->ApplyGameplayEffectSpecToSelf，
@@ -102,7 +103,7 @@ void UAureAbilitySystemComponent::AbilityInputTagReleased(const FGameplayTag& In
  * UAbilitySystemComponent::ExecuteGameplayCue等等
  * 会触发
  * 当 GameplayEffect 成功应用到自身后，服务器调用 ClientEffectApplied（RPC），
- * 客户端收到后自动执行本函数（ClientReliable）
+ * 被影响的特定客户端收到后自动执行本函数（ClientReliable）
  * 用途：把 Effect 里携带的 AssetTag（设计师在蓝图 GE 里填的）广播给 UI 层做提示
  * 
  * UAbilitySystemComponent ：被施加 GE 的那个 ASC 实例本身（客户端的ASC，即自己）
