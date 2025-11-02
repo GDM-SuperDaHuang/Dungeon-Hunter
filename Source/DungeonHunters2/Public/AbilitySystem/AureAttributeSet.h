@@ -211,4 +211,6 @@ public:
 private:
 	// 设置效果属性 - 提取效果相关的上下文信息
 	void SetEffectProperties(const struct FGameplayEffectModCallbackData& Data, FEffectProperties& props) const;
+
+	void ShowFloatingText(const FEffectProperties& Props, float Damage, bool bBlockedHit, bool bCriticalHit) const;
 };

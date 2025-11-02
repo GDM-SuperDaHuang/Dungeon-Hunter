@@ -8,7 +8,10 @@
 #include "GameFramework/Character.h"
 #include "Net/UnrealNetwork.h"
 #include "AuraGameplayTags.h"
+#include "AbilitySystem/AuraAbilitySystemLibrary.h"
 #include "Interaction/CombatInterface.h"
+#include "Kismet/GameplayStatics.h"
+#include "Palyer/AuraPlayerController.h"
 
 UAureAttributeSet::UAureAttributeSet()
 {
@@ -157,6 +160,20 @@ void UAureAttributeSet::SetEffectProperties(const struct FGameplayEffectModCallb
 	}
 }
 
+void UAureAttributeSet::ShowFloatingText(const FEffectProperties& Props, float Damage, bool bBlockedHit,
+                                         bool bCriticalHit) const
+{
+	if (Props.SourceCharacter != Props.TargetCharacter)
+	{
+		AAuraPlayerController* PC = Cast<AAuraPlayerController>(
+			UGameplayStatics::GetPlayerController(Props.SourceCharacter, 0));
+		if (PC)
+		{
+			PC->ShowDamageNumber(Damage, Props.TargetCharacter, bBlockedHit, bCriticalHit);
+		}
+	}
+}
+
 /* ---------- GE 执行完毕 ---------- */
 void UAureAttributeSet::PostGameplayEffectExecute(const struct FGameplayEffectModCallbackData& Data)
 {
@@ -195,7 +212,6 @@ void UAureAttributeSet::PostGameplayEffectExecute(const struct FGameplayEffectMo
 				{
 					CombatInterface->Die();
 				}
-				
 			}
 			else
 			{
@@ -203,6 +219,11 @@ void UAureAttributeSet::PostGameplayEffectExecute(const struct FGameplayEffectMo
 				TagContainer.AddTag(FAuraGameplayTags::Get().Effects_HitReact);
 				Props.TargetASC->TryActivateAbilitiesByTag(TagContainer);
 			}
+
+			bool bBlocked = UAuraAbilitySystemLibrary::IsBlockedHit(Props.EffectContextHandle);
+			bool bCritical = UAuraAbilitySystemLibrary::IsCriticalHit(Props.EffectContextHandle);
+
+			ShowFloatingText(Props, LocalIncomingDamage, bBlocked, bCritical);
 		}
 	}
 

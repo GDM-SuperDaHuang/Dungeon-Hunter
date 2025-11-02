@@ -5,12 +5,15 @@
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AuraGameplayTags.h"
 #include "EnhancedInputSubsystems.h"
+#include "MovieSceneTracksComponentTypes.h"
 #include "NavigationPath.h"
 #include "NavigationSystem.h"
 #include "AbilitySystem/AureAbilitySystemComponent.h"
 #include "Components/SplineComponent.h"
+#include "GameFramework/Character.h"
 #include "Input/AuraInputComponent.h"
 #include "Interaction/EnenmyInterface.h"
+#include "UI/Widget/DamageTextComponent.h"
 
 AAuraPlayerController::AAuraPlayerController()
 {
@@ -21,13 +24,28 @@ AAuraPlayerController::AAuraPlayerController()
 	Spline = CreateDefaultSubobject<USplineComponent>("Spline");
 }
 
+void AAuraPlayerController::ShowDamageNumber_Implementation(float DamageAmount, ACharacter* TargetCharacter,
+                                                            bool bBlockedHit,
+                                                            bool bCriticalHit)
+{
+	if (IsValid(TargetCharacter) && DamageTextComponentClass)
+	{
+		UDamageTextComponent* DamageText = NewObject<UDamageTextComponent>(TargetCharacter, DamageTextComponentClass);
+		DamageText->RegisterComponent();
+		DamageText->AttachToComponent(TargetCharacter->GetRootComponent(),
+		                              FAttachmentTransformRules::KeepRelativeTransform);
+		DamageText->DetachFromComponent(FDetachmentTransformRules::KeepRelativeTransform);
+		DamageText->SetDamageText(DamageAmount, bBlockedHit, bCriticalHit);
+	}
+}
+
 void AAuraPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 	//检查是否有绑定，失败则崩溃
 	check(AuraContext);
 
-    // 拿到本地玩家的 EnhancedInput 子系统，用于动态挂/卸映射上下文
+	// 拿到本地玩家的 EnhancedInput 子系统，用于动态挂/卸映射上下文
 	UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(
 		GetLocalPlayer());
 	// check(Subsystem);单人游戏
@@ -104,11 +122,11 @@ void AAuraPlayerController::Move(const FInputActionValue& InputActionValue)
 {
 	// 增强输入默认返回 FVector2D
 	const FVector2D InputAxisVecter = InputActionValue.Get<FVector2D>();
-	
+
 	//返回 摄像机或控制器 的 世界旋转
 	const FRotator Rotator = GetControlRotation();
 	// 提取 Yaw 旋转，忽略 Pitch/Roll
-	const FRotator YawRotator(0.f, Rotator.Yaw, 0.f);//水平面朝向（俯仰角清零），防止 上坡/下坡 时 前后方向错位。
+	const FRotator YawRotator(0.f, Rotator.Yaw, 0.f); //水平面朝向（俯仰角清零），防止 上坡/下坡 时 前后方向错位。
 
 	// 把二维输入映射到世界空间的前/右方向
 	const FVector ForwardDirection = FRotationMatrix(YawRotator).GetUnitAxis(EAxis::X);
@@ -225,10 +243,10 @@ void AAuraPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 	{
 		GetASC()->AbilityInputTagReleased(InputTag);
 	}
-	
+
 	// 左键技能：
-    // 1. 如果处于瞄准状态 或 按住 Shift → 强制施法
-    // 2. 否则判定为“点地移动”：短按就寻路，长按忽略
+	// 1. 如果处于瞄准状态 或 按住 Shift → 强制施法
+	// 2. 否则判定为“点地移动”：短按就寻路，长按忽略
 	if (!bTargeting && !bShiftKeyDown)
 	{
 		const APawn* ControlledPawn = GetPawn();
@@ -268,8 +286,8 @@ void AAuraPlayerController::AbilityInputTagHeld(FGameplayTag InputTag)
 	}
 
 	// 左键：
-    // 1. 瞄准 或 Shift → 施法
-    // 2. 否则累计 FollowTime，实时朝鼠标方向移动（类似 Diablo 拖拽）
+	// 1. 瞄准 或 Shift → 施法
+	// 2. 否则累计 FollowTime，实时朝鼠标方向移动（类似 Diablo 拖拽）
 	if (bTargeting || bShiftKeyDown)
 	{
 		if (GetASC())

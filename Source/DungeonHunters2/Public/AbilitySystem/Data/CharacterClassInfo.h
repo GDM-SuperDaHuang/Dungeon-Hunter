@@ -47,5 +47,8 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category="Common Class Defaluts")
 	TArray<TSubclassOf<UGameplayAbility>> CommonAbilities;
 
+	UPROPERTY(EditDefaultsOnly, Category="Common Class Defaluts")
+	TObjectPtr<UCurveTable> DamageCalculationCoefficients;
+	
 	FCharacterClassDefaultInfo GetClassDefaultInfo(ECharacterClass CharacterClass);
 };

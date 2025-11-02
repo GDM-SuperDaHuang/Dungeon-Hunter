@@ -13,18 +13,18 @@ AAuraCharacterBase::AAuraCharacterBase()
 	PrimaryActorTick.bCanEverTick = false;
 
 	// === 碰撞设置 ==========================================================
-    // 胶囊体对摄像机忽略，避免穿墙遮挡
+	// 胶囊体对摄像机忽略，避免穿墙遮挡
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 	//这会把角色胶囊体的 GenerateOverlapEvents 标记关掉，从此胶囊他不再触发重叠事件：
 	//关闭胶囊体重叠事件，统一用网格体接收投射物
 	GetCapsuleComponent()->SetGenerateOverlapEvents(false);
 	// 网格体对摄像机忽略，对投射物只触发重叠
 	GetMesh()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
-	GetMesh()->SetCollisionResponseToChannel(ECC_Projectile,ECR_Overlap);
+	GetMesh()->SetCollisionResponseToChannel(ECC_Projectile, ECR_Overlap);
 	GetMesh()->SetGenerateOverlapEvents(true);
-	
 
-    // === 武器组件 ===========================================================
+
+	// === 武器组件 ===========================================================
 	Weapon = CreateDefaultSubobject<USkeletalMeshComponent>("Weapon");
 	// 挂到右手插槽，可在子类改 Socket 名
 	Weapon->SetupAttachment(GetMesh(), FName(TEXT("WeaponHandSocket")));
@@ -58,11 +58,9 @@ void AAuraCharacterBase::MulticastHandleDeath_Implementation()
 	GetMesh()->SetEnableGravity(true);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
 	GetMesh()->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Block);
-	
+
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	Dissolve();
-	
-	
 }
 
 void AAuraCharacterBase::BeginPlay()
@@ -110,23 +108,22 @@ void AAuraCharacterBase::AddCharacterAbilities()
 	UAureAbilitySystemComponent* AureASC = CastChecked<UAureAbilitySystemComponent>(AbilitySystemComponent);
 	if (!HasAuthority()) return;
 	AureASC->AddCharacterAbilities(StartUpAbility);
-
-	
 }
 
 void AAuraCharacterBase::Dissolve()
 {
 	if (IsValid(DissolveMaterialInstance))
 	{
-		UMaterialInstanceDynamic* DynamicMatInst = UMaterialInstanceDynamic::Create(DissolveMaterialInstance,this);
+		UMaterialInstanceDynamic* DynamicMatInst = UMaterialInstanceDynamic::Create(DissolveMaterialInstance, this);
 		GetMesh()->SetMaterial(0, DynamicMatInst);
 		StartDissolveTimeline(DynamicMatInst);
 	}
 
 	if (IsValid(WeaponDissolveMaterialInstance))
 	{
-		UMaterialInstanceDynamic* DynamicMatInst = UMaterialInstanceDynamic::Create(WeaponDissolveMaterialInstance,this);
+		UMaterialInstanceDynamic* DynamicMatInst = UMaterialInstanceDynamic::Create(
+			WeaponDissolveMaterialInstance, this);
 		Weapon->SetMaterial(0, DynamicMatInst);
-		StartDissolveTimeline(DynamicMatInst);
+		StartWeaponDissolveTimeline(DynamicMatInst);
 	}
 }

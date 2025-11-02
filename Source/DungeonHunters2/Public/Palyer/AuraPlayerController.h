@@ -7,6 +7,7 @@
 #include "GameplayTagContainer.h"
 #include "AuraPlayerController.generated.h"
 
+class UDamageTextComponent;
 class UAuraInputConfig;
 class UInputMappingContext;
 class UInputAction;
@@ -25,6 +26,10 @@ class DUNGEONHUNTERS2_API AAuraPlayerController : public APlayerController
 public:
 	AAuraPlayerController();
 
+	UFUNCTION(Client, Reliable)
+	void ShowDamageNumber(float DamageAmount, ACharacter* TargetCharacter, bool bBlockedHit,
+	                      bool bCriticalHit);
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
@@ -41,15 +46,17 @@ private:
 	TObjectPtr<UInputAction> ShiftAction;
 
 	void Move(const FInputActionValue& InputActionValue);
-	
+
 	void ShiftPressed(const FInputActionValue& InputActionValue)
 	{
 		bShiftKeyDown = true;
 	}
+
 	void ShiftReleased(const FInputActionValue& InputActionValue)
 	{
 		bShiftKeyDown = false;
 	}
+
 	bool bShiftKeyDown = false;
 
 	void CursorTrace();
@@ -57,7 +64,7 @@ private:
 	IEnenmyInterface* LastActor;
 	IEnenmyInterface* ThisActor;
 	FHitResult CursorHit;
-	
+
 	void AbilityInputTagPressed(FGameplayTag InputTag);
 	void AbilityInputTagReleased(FGameplayTag InputTag);
 	void AbilityInputTagHeld(FGameplayTag InputTag);
@@ -83,4 +90,7 @@ private:
 	TObjectPtr<USplineComponent> Spline;
 
 	void AutoRun();
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<UDamageTextComponent> DamageTextComponentClass;
 };
