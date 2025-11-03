@@ -64,38 +64,46 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 	 * input
 	 */
 	GameplayTags.InputTag_LMB = UGameplayTagsManager::Get().AddNativeGameplayTag(
-	FName(TEXT("InputTag.LMB")),
-	FString("input tag for left mouse button"));
-	
+		FName(TEXT("InputTag.LMB")),
+		FString("input tag for left mouse button"));
+
 	GameplayTags.InputTag_RMB = UGameplayTagsManager::Get().AddNativeGameplayTag(
-	FName(TEXT("InputTag.RMB")),
-	FString("input tag for right mouse button"));
-	
+		FName(TEXT("InputTag.RMB")),
+		FString("input tag for right mouse button"));
+
 	GameplayTags.InputTag_1 = UGameplayTagsManager::Get().AddNativeGameplayTag(
-	FName(TEXT("InputTag.1")),
-	FString("input tag for 1"));
-	
+		FName(TEXT("InputTag.1")),
+		FString("input tag for 1"));
+
 	GameplayTags.InputTag_2 = UGameplayTagsManager::Get().AddNativeGameplayTag(
-	FName(TEXT("InputTag.2")),
-	FString("input tag for 2"));
-	
+		FName(TEXT("InputTag.2")),
+		FString("input tag for 2"));
+
 	GameplayTags.InputTag_3 = UGameplayTagsManager::Get().AddNativeGameplayTag(
-	FName(TEXT("InputTag.3")),
-	FString("input tag for 2"));
-	
+		FName(TEXT("InputTag.3")),
+		FString("input tag for 2"));
+
 	GameplayTags.InputTag_4 = UGameplayTagsManager::Get().AddNativeGameplayTag(
-	FName(TEXT("InputTag.4")),
-	FString("input tag for 4"));
+		FName(TEXT("InputTag.4")),
+		FString("input tag for 4"));
 
 	GameplayTags.Event_Montage_FireBolt = UGameplayTagsManager::Get().AddNativeGameplayTag(
-	FName(TEXT("Event.Montage.FireBolt")),
-	FString("FireBolt"));
+		FName(TEXT("Event.Montage.FireBolt")),
+		FString("FireBolt"));
 
 	GameplayTags.Damage = UGameplayTagsManager::Get().AddNativeGameplayTag(
-	FName(TEXT("Damage")),
-	FString("Damage"));
+		FName(TEXT("Damage")),
+		FString("Damage"));
+
+	GameplayTags.Damage_Fire = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName(TEXT("Damage.Fire")),
+		FString("Damage Fire Type"));
+
+
+	GameplayTags.DamageTypes.Add(GameplayTags.Damage_Fire);
+
 
 	GameplayTags.Effects_HitReact = UGameplayTagsManager::Get().AddNativeGameplayTag(
-	FName(TEXT("Effects.HitReact")),
-	FString("Effects.HitReact"));
+		FName(TEXT("Effects.HitReact")),
+		FString("Effects.HitReact"));
 }

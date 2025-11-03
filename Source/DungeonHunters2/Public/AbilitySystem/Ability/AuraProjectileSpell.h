@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "AbilitySystem/Ability/AuraGameplayAbility.h"
+#include "AuraDamageGameplayAbility.h"
 #include "AuraProjectileSpell.generated.h"
 
 class AAuraProjectile;
@@ -12,7 +12,7 @@ class AAuraProjectile;
  * 专门用于处理需要发射实体投射物（如火球、冰箭）的技能
  */
 UCLASS()
-class DUNGEONHUNTERS2_API UAuraProjectileSpell : public UAuraGameplayAbility
+class DUNGEONHUNTERS2_API UAuraProjectileSpell : public UAuraDamageGameplayAbility
 {
 	GENERATED_BODY()
 
@@ -45,6 +45,4 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TSubclassOf<AAuraProjectile> ProjectileClass;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	TSubclassOf<UGameplayEffect> DamageEffectClass;
 };

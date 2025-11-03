@@ -68,7 +68,14 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 	EvaluateParams.TargetTags = TargetTags;
 
 	//伤害
-	float Damage = Spec.GetSetByCallerMagnitude(FAuraGameplayTags::Get().Damage);
+	float Damage = 0.f;
+
+	for (FGameplayTag DamageType : FAuraGameplayTags::Get().DamageTypes)
+	{
+		const float DamageTypeValue = Spec.GetSetByCallerMagnitude(DamageType);
+		Damage += DamageTypeValue;
+	}
+
 
 	//格挡
 	float TargetBlockChance = 0.f;
@@ -133,7 +140,7 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 	const float EffectiveCriticalHitChance = SourceCriticalHitChance - TargetCriticalHitResistance *
 		CriticalHitResistanceCoefficient;
 	const bool bCriticalHit = FMath::RandRange(1, 100) < EffectiveCriticalHitChance;
-	
+
 	UAuraAbilitySystemLibrary::SetCriticalHit(EffectContextHandle, bCriticalHit);
 
 	Damage = bCriticalHit ? 2.f * Damage + SourceCriticalHitDamage : Damage;

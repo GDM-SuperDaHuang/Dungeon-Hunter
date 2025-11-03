@@ -70,16 +70,18 @@ void UAuraProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocati
 		FHitResult HitResult;
 		HitResult.Location = ProjectileTargetLocation;
 		EffectContextHandle.AddHitResult(HitResult);
-		
+
 		const FGameplayEffectSpecHandle SpecHandle = SourceASC->MakeOutgoingSpec(
 			DamageEffectClass, GetAbilityLevel(), EffectContextHandle);
-		
+
 		FAuraGameplayTags GameplayTags = FAuraGameplayTags::Get();
 		// 根据配置表等级获取对应的伤害值
-		const float ScaledDame = Damage.GetValueAtLevel(GetAbilityLevel());
-		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, FString::Printf(TEXT("Damage: %f"), ScaledDame));
-
-		UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, GameplayTags.Damage, ScaledDame);
+		for (TPair<FGameplayTag, FScalableFloat> Pair : DamageType)
+		{
+			const float ScaledDame = Pair.Value.GetValueAtLevel(GetAbilityLevel());
+			GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, FString::Printf(TEXT("Damage: %f"), ScaledDame));
+			UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, Pair.Key, ScaledDame);
+		}
 		Projectile->DamageEffectHandle = SpecHandle;
 
 
