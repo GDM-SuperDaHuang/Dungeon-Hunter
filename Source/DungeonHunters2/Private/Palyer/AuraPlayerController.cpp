@@ -35,6 +35,11 @@ void AAuraPlayerController::ShowDamageNumber_Implementation(float DamageAmount, 
 		DamageText->AttachToComponent(TargetCharacter->GetRootComponent(),
 		                              FAttachmentTransformRules::KeepRelativeTransform);
 		DamageText->DetachFromComponent(FDetachmentTransformRules::KeepRelativeTransform);
+		//???
+		FVector SpawnLoc = TargetCharacter->GetActorLocation();
+		SpawnLoc.Z += 10.f;          // 离地 0.1 米
+		DamageText->SetWorldLocation(SpawnLoc);
+
 		DamageText->SetDamageText(DamageAmount, bBlockedHit, bCriticalHit);
 	}
 }
