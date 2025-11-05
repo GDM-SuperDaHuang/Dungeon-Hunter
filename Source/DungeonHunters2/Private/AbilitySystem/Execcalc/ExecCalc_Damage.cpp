@@ -69,14 +69,12 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 
 	//伤害
 	float Damage = 0.f;
-
-	for (FGameplayTag DamageType : FAuraGameplayTags::Get().DamageTypes)
+	for (TPair<FGameplayTag, FGameplayTag> Pair : FAuraGameplayTags::Get().DamageTypesToResilience)
 	{
-		const float DamageTypeValue = Spec.GetSetByCallerMagnitude(DamageType);
+		const float DamageTypeValue = Spec.GetSetByCallerMagnitude(Pair.Key);
 		Damage += DamageTypeValue;
 	}
-
-
+	
 	//格挡
 	float TargetBlockChance = 0.f;
 	ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(DamageStatics().BlockChanceDef, EvaluateParams,
