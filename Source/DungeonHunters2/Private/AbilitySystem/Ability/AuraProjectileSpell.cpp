@@ -9,6 +9,7 @@
 #include "Actor/AuraProjectile.h"
 #include "Interaction/CombatInterface.h"
 
+// TryActivateAbility触发引擎回调
 void UAuraProjectileSpell::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
                                            const FGameplayAbilityActorInfo* ActorInfo,
                                            const FGameplayAbilityActivationInfo ActivationInfo,
@@ -25,7 +26,7 @@ void UAuraProjectileSpell::ActivateAbility(const FGameplayAbilitySpecHandle Hand
  */
 void UAuraProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocation)
 {
-	// 仅在服务器端生成投射物（网络同步：确保多端一致性，避免客户端各自生成）
+	// 仅在服务器端生成投射物（网络同步：确保多端一致性，避免客户端各自生成）todo ???
 	bool bHasAuthority = GetAvatarActorFromActorInfo()->HasAuthority();
 	if (!bHasAuthority) return;
 

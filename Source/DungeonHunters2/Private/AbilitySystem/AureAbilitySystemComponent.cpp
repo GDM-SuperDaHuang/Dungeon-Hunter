@@ -37,7 +37,7 @@ void UAureAbilitySystemComponent::AddCharacterAbilities(const TArray<TSubclassOf
 			/**
 			 * GiveAbility
 			 * 1. 生成全局唯一 Handle （通常一种技能一个）
-			 * 2. 实例化 GA 对象（CDO → 实例）
+			 * 2. 实例化 GA 对象（CDO → 实例），里面初始化了AvatarActor ，OwnerActor，PlayerController 
 			 * 3. 塞进 ActiveAbilitySpecs 数组
 			 * 4. 标记网络脏，客户端会收到复制包并本地生成影子 Spec
 			 */
@@ -56,7 +56,7 @@ void UAureAbilitySystemComponent::AbilityInputTagHeld(const FGameplayTag& InputT
 {
 	if (!InputTags.IsValid()) return;
 
-	// GetActivatableAbilities() 返回当前可被激活的技能 Spec
+	// GetActivatableAbilities() 返回当前可被激活的技能 Spec,GiveAbility(AbilitySpec);
 	for (FGameplayAbilitySpec AbilitySpec : GetActivatableAbilities())
 	{
 		//查找 AbilitySpec.DynamicAbilityTags.AddTag(AuraAbility->StartupInputTag); 之前存进的标签 

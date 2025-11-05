@@ -12,7 +12,7 @@ AAurePlayerState::AAurePlayerState()
 {
 	//每秒更新100次
 	NetUpdateFrequency=100.0f;
-	// todo 
+	// 这里ASC最大扫描和UAureAttributeSet进行绑定
 	AbilitySystemComponent=CreateDefaultSubobject<UAureAbilitySystemComponent>("AbilitySystemComponent");
 	AbilitySystemComponent->SetIsReplicated(true);	//复制
 	AbilitySystemComponent->SetReplicationMode(EGameplayEffectReplicationMode::Mixed);
