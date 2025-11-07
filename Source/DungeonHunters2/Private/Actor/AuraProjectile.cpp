@@ -17,27 +17,27 @@ AAuraProjectile::AAuraProjectile()
 	PrimaryActorTick.bCanEverTick = false;
 	// 2. 打开网络同步：让服务器生成、客户端自动复制
 	bReplicates = true;
-	 /*--------------------------------------------------------------------------
-        碰撞体：SphereComponent
-        原则：只检测、不阻挡，避免把别人顶飞；用 Overlap 做“命中”
-    --------------------------------------------------------------------------*/
+	/*--------------------------------------------------------------------------
+       碰撞体：SphereComponent
+       原则：只检测、不阻挡，避免把别人顶飞；用 Overlap 做“命中”
+   --------------------------------------------------------------------------*/
 	Sphere = CreateDefaultSubobject<USphereComponent>(TEXT("Sphere"));
-	SetRootComponent(Sphere);// 根组件必须是碰撞体，否则 MovementComponent 会警告
+	SetRootComponent(Sphere); // 根组件必须是碰撞体，否则 MovementComponent 会警告
 	Sphere->SetCollisionObjectType(ECC_Projectile);
-	Sphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);// 先全部忽略
+	Sphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly); // 先全部忽略
 	Sphere->SetCollisionResponseToAllChannels(ECR_Ignore);
 	Sphere->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Overlap);
 	Sphere->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Overlap);
-	Sphere->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);// 打玩家/敌人全靠这一行
+	Sphere->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap); // 打玩家/敌人全靠这一行
 
- 	/*--------------------------------------------------------------------------
-        飞行组件：ProjectileMovementComponent
-        负责“直线飞行 + 重力可选 + 速度同步”
-    --------------------------------------------------------------------------*/
+	/*--------------------------------------------------------------------------
+	    飞行组件：ProjectileMovementComponent
+	    负责“直线飞行 + 重力可选 + 速度同步”
+	--------------------------------------------------------------------------*/
 	ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>("ProjectileMovement");
-	ProjectileMovement->InitialSpeed = 550.0f;// 初始速度
+	ProjectileMovement->InitialSpeed = 550.0f; // 初始速度
 	ProjectileMovement->MaxSpeed = 550.0f; // 最大速度（想做成“加速箭”可再把 Max 提高）
-	ProjectileMovement->ProjectileGravityScale = 0;// 0 = 纯直线，火球冰箭常用；弓箭可把这里调 0.5~1
+	ProjectileMovement->ProjectileGravityScale = 0; // 0 = 纯直线，火球冰箭常用；弓箭可把这里调 0.5~1
 }
 
 /*------------------------------------------------------------------------------
@@ -50,17 +50,18 @@ void AAuraProjectile::BeginPlay()
 	SetLifeSpan(LiftSpan);
 	// 动态绑定：当 Sphere 与任意组件发生 Overlap 时调用 OnSphereOverlap
 	Sphere->OnComponentBeginOverlap.AddDynamic(this, &AAuraProjectile::OnSphereOverlap);
-
-	LoopingSoundComponent = UGameplayStatics::SpawnSoundAttached(LoopingSound,GetRootComponent());
-	
+	if (LoopingSoundComponent)
+	{
+		LoopingSoundComponent = UGameplayStatics::SpawnSoundAttached(LoopingSound, GetRootComponent());
+	}
 }
 
 void AAuraProjectile::Destroyed()
 {
 	if (!bHit && !HasAuthority())
 	{
-		UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation(),FRotator::ZeroRotator);
-		UNiagaraFunctionLibrary::SpawnSystemAtLocation(this,ImpactEffect,GetActorLocation());
+		UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation(), FRotator::ZeroRotator);
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ImpactEffect, GetActorLocation());
 	}
 	Super::Destroyed();
 }
@@ -73,17 +74,35 @@ void AAuraProjectile::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, 
                                       UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
                                       const FHitResult& SweepResult)
 {
-	UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation(),FRotator::ZeroRotator);
-	UNiagaraFunctionLibrary::SpawnSystemAtLocation(this,ImpactEffect,GetActorLocation());
-	LoopingSoundComponent->Stop();
+	// ???
+	if (DamageEffectHandle.Data.IsValid() && DamageEffectHandle.Data.Get()->GetContext().GetEffectCauser() ==
+		OtherActor)
+	{
+		return;
+	}
+
+	if (!bHit)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation(), FRotator::ZeroRotator);
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ImpactEffect, GetActorLocation());
+
+		//???
+		if (LoopingSoundComponent)
+		{
+			LoopingSoundComponent->Stop();
+		}
+	}
+
+	
+
 	if (HasAuthority())
 	{
 		if (UAbilitySystemComponent* TargetASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(OtherActor))
 		{
 			TargetASC->ApplyGameplayEffectSpecToSelf(*DamageEffectHandle.Data.Get());
 		}
-		
-		
+
+
 		Destroy();
 	}
 	else

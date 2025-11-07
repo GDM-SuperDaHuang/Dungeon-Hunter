@@ -38,7 +38,7 @@ void UAuraProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocati
 		// 从武器的特定socket（如"WeaponTip"）获取发射位置
 		const FVector CombatSocketLocation = CombatInterface->GetCombatSocketLocation();
 		FRotator Rotation = (ProjectileTargetLocation - CombatSocketLocation).Rotation();
-		Rotation.Pitch = 0.f;
+		// Rotation.Pitch = 0.f;
 
 
 		//射击 ,并且在武器处产生

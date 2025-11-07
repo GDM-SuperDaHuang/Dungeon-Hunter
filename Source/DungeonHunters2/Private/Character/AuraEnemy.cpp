@@ -74,7 +74,10 @@ void AAuraEnemy::BeginPlay()
 	Super::BeginPlay();
 	GetCharacterMovement()->MaxWalkSpeed = BaseWalkSpeed;
 	InitAbilityActorInfo();
-	UAuraAbilitySystemLibrary::GiveStartupAbilities(this,AbilitySystemComponent);
+	if (HasAuthority())
+	{
+		UAuraAbilitySystemLibrary::GiveStartupAbilities(this,AbilitySystemComponent);
+	}
 
 
 	// 把血条控件控制器指向自己，方便属性绑定
@@ -132,8 +135,11 @@ void AAuraEnemy::InitAbilityActorInfo()
 
 	// 通知 ASC 内部完成后续注册
 	Cast<UAureAbilitySystemComponent>(AbilitySystemComponent)->AbilityActorInfoSet();
-
-	InitializeDefaultAbilities();
+	if (HasAuthority())
+	{
+		InitializeDefaultAbilities();
+	}
+	
 }
 
 void AAuraEnemy::InitializeDefaultAbilities() const
