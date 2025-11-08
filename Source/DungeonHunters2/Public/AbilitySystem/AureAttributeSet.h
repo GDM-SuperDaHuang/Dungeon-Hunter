@@ -81,6 +81,7 @@ public:
 
 	//方式4
 	// TMap<FGameplayTag, TBaseStaticDelegateInstance<FGameplayAttribute(), FDefaultDelegateUserPolicy>::FFuncPtr> TagsToAttributes;
+	
 	TMap<FGameplayTag, FAttributeFuncPtr<FGameplayAttribute()>> TagsToAttributes;
 
 	/*
