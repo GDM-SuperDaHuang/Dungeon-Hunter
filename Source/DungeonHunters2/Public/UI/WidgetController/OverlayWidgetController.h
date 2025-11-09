@@ -38,7 +38,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMessageWidgetRowSignature, FUIWidge
 
 
 /**
- * 
+ * 血条，法力条的 UI控制器
  */
 UCLASS(BlueprintType, Blueprintable)
 class DUNGEONHUNTERS2_API UOverlayWidgetController : public UAuraWidgetController

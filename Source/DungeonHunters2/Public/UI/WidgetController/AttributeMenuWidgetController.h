@@ -12,7 +12,7 @@ struct FAuraAttributeInfo;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAttributeInfoSignature, const FAuraAttributeInfo&, Info);
 
 /**
- * 
+ * 属性展览菜单
  */
 UCLASS(BlueprintType, Blueprintable)
 class DUNGEONHUNTERS2_API UAttributeMenuWidgetController : public UAuraWidgetController
