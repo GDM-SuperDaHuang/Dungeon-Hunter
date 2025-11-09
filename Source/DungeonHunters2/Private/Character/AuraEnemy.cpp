@@ -8,6 +8,9 @@
 #include "AbilitySystem/AuraAbilitySystemLibrary.h"
 #include "AbilitySystem/AureAbilitySystemComponent.h"
 #include "AbilitySystem/AureAttributeSet.h"
+#include "AI/AuraAIController.h"
+#include "BehaviorTree/BehaviorTree.h"
+#include "BehaviorTree/BlackboardComponent.h"
 #include "DungeonHunters2/DungeonHunters2.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
@@ -30,12 +33,30 @@ AAuraEnemy::AAuraEnemy()
 
 	// Minimal 模式：仅复制 ActiveGE 列表与属性，不复制 GameplayCue
 	AbilitySystemComponent->SetReplicationMode(EGameplayEffectReplicationMode::Minimal);
+	bUseControllerRotationPitch = false;
+	bUseControllerRotationRoll = false;
+	bUseControllerRotationYaw = false;
+	GetCharacterMovement()->bUseControllerDesiredRotation = true;
 
 	// 属性集
 	AttributeSet = CreateDefaultSubobject<UAureAttributeSet>("AttributeSet");
 	// 头顶血条组件
 	HealthBar = CreateDefaultSubobject<UWidgetComponent>("HealthBar");
 	HealthBar->SetupAttachment(GetRootComponent());
+}
+
+void AAuraEnemy::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+
+	if (!HasAuthority()) return;
+	AuraAIController = Cast<AAuraAIController>(NewController);
+	AuraAIController->GetBlackboardComponent()->InitializeBlackboard(*BehaviorTree->BlackboardAsset);
+	AuraAIController->RunBehaviorTree(BehaviorTree);
+	AuraAIController->GetBlackboardComponent()->SetValueAsBool(FName("HitReacting"),false);
+	// 远程攻击类型
+	AuraAIController->GetBlackboardComponent()->SetValueAsBool(FName("RangedAttacker"),CharacterClass != ECharacterClass::Warrior);
+	
 }
 
 /* -------------------- 接口实现 -------------------- */
@@ -76,7 +97,7 @@ void AAuraEnemy::BeginPlay()
 	InitAbilityActorInfo();
 	if (HasAuthority())
 	{
-		UAuraAbilitySystemLibrary::GiveStartupAbilities(this,AbilitySystemComponent);
+		UAuraAbilitySystemLibrary::GiveStartupAbilities(this, AbilitySystemComponent);
 	}
 
 
@@ -86,8 +107,7 @@ void AAuraEnemy::BeginPlay()
 		AuraUserWidget->SetWidgetController(this);
 	}
 
-	
-	
+
 	// 监听 Health/MaxHealth 变化并广播到蓝图（UI 订阅）
 	if (const UAureAttributeSet* AureAS = Cast<UAureAttributeSet>(AttributeSet))
 	{
@@ -121,9 +141,8 @@ void AAuraEnemy::HitReactTagChanged(const FGameplayTag CallbackTag, int32 NewCou
 	bHitReacting = NewCount > 0;
 	//击中后，停止移动
 	GetCharacterMovement()->MaxWalkSpeed = bHitReacting ? 0.0f : BaseWalkSpeed;
-	if (NewCount > 0)
-	{
-	}
+	AuraAIController->GetBlackboardComponent()->SetValueAsBool(FName("HitReacting"),bHitReacting);
+
 }
 
 /* -------------------- ASC 初始化 -------------------- */
@@ -139,7 +158,6 @@ void AAuraEnemy::InitAbilityActorInfo()
 	{
 		InitializeDefaultAbilities();
 	}
-	
 }
 
 void AAuraEnemy::InitializeDefaultAbilities() const

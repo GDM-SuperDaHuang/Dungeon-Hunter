@@ -10,6 +10,8 @@
 #include "UI/WidgetController/OverlayWidgetController.h"
 #include "AuraEnemy.generated.h"
 
+class AAuraAIController;
+class UBehaviorTree;
 enum class ECharacterClass : uint8;
 /**
  * 
@@ -23,6 +25,7 @@ class DUNGEONHUNTERS2_API AAuraEnemy : public AAuraCharacterBase, public IEnenmy
 public:
 	AAuraEnemy();
 
+	virtual void PossessedBy(AController* NewController) override;
 	/** Begin IEnenmyInterface */
 	//敌人选中后高光
 	virtual void HighlightActor() override;
@@ -40,15 +43,15 @@ public:
 	FOnAttributeChangedSignature OnMaxHealthChanged;
 	void HitReactTagChanged(const FGameplayTag CallbackTag, int32 NewCount);
 
-	UPROPERTY(BlueprintReadOnly,Category="Combat")
+	UPROPERTY(BlueprintReadOnly, Category="Combat")
 	bool bHitReacting = false;
 
-	UPROPERTY(BlueprintReadOnly,Category="Combat")
+	UPROPERTY(BlueprintReadOnly, Category="Combat")
 	float BaseWalkSpeed = 250.f;
 
-	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category="Combat")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Combat")
 	float LifeSpan = 5.f;
-	
+
 protected:
 	virtual void BeginPlay() override;
 	// //
@@ -65,6 +68,12 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UWidgetComponent> HealthBar;
+
+	UPROPERTY(EditAnywhere, Category="AI")
+	TObjectPtr<UBehaviorTree> BehaviorTree;
+
+	UPROPERTY()
+	TObjectPtr<AAuraAIController> AuraAIController;
 
 private:
 };

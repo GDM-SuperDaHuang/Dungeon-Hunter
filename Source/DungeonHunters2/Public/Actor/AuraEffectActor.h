@@ -69,8 +69,12 @@ protected:
 
 	/** 当效果被移除时，是否销毁当前Actor（如一次性消耗品） */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Applied Effects")
-	bool bDestroyOnEffectRemoval = false;
+	bool bDestroyOnEffectApplication = false;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Applied Effects")
+	bool bApplyEffectEnemies = false;
+
+	
 	// 三种效果的应用策略配置（在蓝图/编辑器中可设置）
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Applied Effects")
 	EEffectApplicationPolicy InstantEffectApplicationPolicy = EEffectApplicationPolicy::DoNotApply;
