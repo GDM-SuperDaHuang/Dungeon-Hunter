@@ -32,61 +32,62 @@ void UAuraProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocati
 
 	// 获取施法者的战斗接口（用于获取武器发射点等战斗相关数据）
 	// ICombatInterface由角色类实现，提供GetCombatSocketLocation等战斗相关方法
-	ICombatInterface* CombatInterface = Cast<ICombatInterface>(GetAvatarActorFromActorInfo());
-	if (CombatInterface)
+	// ICombatInterface* CombatInterface = Cast<ICombatInterface>(GetAvatarActorFromActorInfo());
+
+	// ??? todo 去掉虚拟，调用只能静态？
+	const FVector CombatSocketLocation = ICombatInterface::Execute_GetCombatSocketLocation(
+		GetAvatarActorFromActorInfo(), FAuraGameplayTags::Get().Event_Montage_Attack_Weapon);
+
+	// 从武器的特定socket（如"WeaponTip"）获取发射位置
+	// const FVector CombatSocketLocation = CombatInterface->GetCombatSocketLocation();
+	FRotator Rotation = (ProjectileTargetLocation - CombatSocketLocation).Rotation();
+	// Rotation.Pitch = 0.f;
+
+
+	//射击 ,并且在武器处产生
+	FTransform SpawnTransform;
+	SpawnTransform.SetLocation(CombatSocketLocation);
+	SpawnTransform.SetRotation(Rotation.Quaternion());
+
+	// 延迟生成投射物（Deferred Spawn）：先创建实例但不初始化，可在初始化前设置属性
+	/**
+	 * SpawnActor → 碰撞体立即生效 → 可能 与生成者重叠 → 引擎报错。
+	 * SpawnActorDeferred → 碰撞体、组件、BeginPlay 都不激活 → 给你时间 设置属性 → 再 Finish。
+	 */
+	AAuraProjectile* Projectile = GetWorld()->SpawnActorDeferred<AAuraProjectile>(
+		ProjectileClass,
+		SpawnTransform,
+		GetOwningActorFromActorInfo(),
+		Cast<APawn>(GetOwningActorFromActorInfo()),
+		ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
+
+	//伤害计算
+	const UAbilitySystemComponent* SourceASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(
+		GetAvatarActorFromActorInfo());
+	FGameplayEffectContextHandle EffectContextHandle = SourceASC->MakeEffectContext();
+	EffectContextHandle.SetAbility(this);
+	EffectContextHandle.AddSourceObject(Projectile);
+	TArray<TWeakObjectPtr<AActor>> Actors;
+	Actors.Add(Projectile);
+	EffectContextHandle.AddActors(Actors);
+	FHitResult HitResult;
+	HitResult.Location = ProjectileTargetLocation;
+	EffectContextHandle.AddHitResult(HitResult);
+
+	const FGameplayEffectSpecHandle SpecHandle = SourceASC->MakeOutgoingSpec(
+		DamageEffectClass, GetAbilityLevel(), EffectContextHandle);
+
+	FAuraGameplayTags GameplayTags = FAuraGameplayTags::Get();
+	// 根据配置表等级获取对应的伤害值
+	for (TPair<FGameplayTag, FScalableFloat> Pair : DamageType)
 	{
-		// 从武器的特定socket（如"WeaponTip"）获取发射位置
-		const FVector CombatSocketLocation = CombatInterface->GetCombatSocketLocation();
-		FRotator Rotation = (ProjectileTargetLocation - CombatSocketLocation).Rotation();
-		// Rotation.Pitch = 0.f;
+		const float ScaledDame = Pair.Value.GetValueAtLevel(GetAbilityLevel());
+		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, FString::Printf(TEXT("Damage: %f"), ScaledDame));
+		UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, Pair.Key, ScaledDame);
+	}
+	Projectile->DamageEffectHandle = SpecHandle;
 
 
-		//射击 ,并且在武器处产生
-		FTransform SpawnTransform;
-		SpawnTransform.SetLocation(CombatSocketLocation);
-		SpawnTransform.SetRotation(Rotation.Quaternion());
-
-
-		// 延迟生成投射物（Deferred Spawn）：先创建实例但不初始化，可在初始化前设置属性
-		/**
-		 * SpawnActor → 碰撞体立即生效 → 可能 与生成者重叠 → 引擎报错。
-		 * SpawnActorDeferred → 碰撞体、组件、BeginPlay 都不激活 → 给你时间 设置属性 → 再 Finish。
-		 */
-		AAuraProjectile* Projectile = GetWorld()->SpawnActorDeferred<AAuraProjectile>(
-			ProjectileClass,
-			SpawnTransform,
-			GetOwningActorFromActorInfo(),
-			Cast<APawn>(GetOwningActorFromActorInfo()),
-			ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
-
-		//伤害计算
-		const UAbilitySystemComponent* SourceASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(
-			GetAvatarActorFromActorInfo());
-		FGameplayEffectContextHandle EffectContextHandle = SourceASC->MakeEffectContext();
-		EffectContextHandle.SetAbility(this);
-		EffectContextHandle.AddSourceObject(Projectile);
-		TArray<TWeakObjectPtr<AActor>> Actors;
-		Actors.Add(Projectile);
-		EffectContextHandle.AddActors(Actors);
-		FHitResult HitResult;
-		HitResult.Location = ProjectileTargetLocation;
-		EffectContextHandle.AddHitResult(HitResult);
-
-		const FGameplayEffectSpecHandle SpecHandle = SourceASC->MakeOutgoingSpec(
-			DamageEffectClass, GetAbilityLevel(), EffectContextHandle);
-
-		FAuraGameplayTags GameplayTags = FAuraGameplayTags::Get();
-		// 根据配置表等级获取对应的伤害值
-		for (TPair<FGameplayTag, FScalableFloat> Pair : DamageType)
-		{
-			const float ScaledDame = Pair.Value.GetValueAtLevel(GetAbilityLevel());
-			GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, FString::Printf(TEXT("Damage: %f"), ScaledDame));
-			UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, Pair.Key, ScaledDame);
-		}
-		Projectile->DamageEffectHandle = SpecHandle;
-
-
-		// SpawnActorDeferred需要FinishSpawning， 完成投射物生成（应用之前的设置，触发AAuraProjectile的BeginPlay）
-		Projectile->FinishSpawning(SpawnTransform);
-	};
+	// SpawnActorDeferred需要FinishSpawning， 完成投射物生成（应用之前的设置，触发AAuraProjectile的BeginPlay）
+	Projectile->FinishSpawning(SpawnTransform);
 }

@@ -29,7 +29,7 @@ public:
 	FGameplayTag Attributes_Secondary_CriticalHitResistance;
 	FGameplayTag Attributes_Secondary_HealthRegeneration;
 	FGameplayTag Attributes_Secondary_ManaRegeneration;
-	
+
 	FGameplayTag Attributes_Secondary_MaxHealth;
 	FGameplayTag Attributes_Secondary_MaxMana;
 
@@ -40,7 +40,7 @@ public:
 	FGameplayTag Attributes_Resilience_Arcane;
 	FGameplayTag Attributes_Resilience_Physical;
 
-	
+
 	FGameplayTag InputTag_LMB;
 	FGameplayTag InputTag_RMB;
 	FGameplayTag InputTag_1;
@@ -49,7 +49,13 @@ public:
 	FGameplayTag InputTag_4;
 
 
+	//蒙太奇事件通知标签
 	FGameplayTag Event_Montage_FireBolt;
+	// FGameplayTag Event_Montage_Attack_Melee;
+	FGameplayTag Event_Montage_Attack_Weapon;
+	FGameplayTag Event_Montage_Attack_RightHand;
+	FGameplayTag Event_Montage_Attack_LeftHand;
+
 
 	//伤害类型
 	FGameplayTag Damage;
@@ -58,12 +64,11 @@ public:
 	FGameplayTag Damage_Arcane;
 	FGameplayTag Damage_Physical;
 
-	TMap<FGameplayTag,FGameplayTag> DamageTypesToResilience;
+	FGameplayTag Abilities_Attack;
+	TMap<FGameplayTag, FGameplayTag> DamageTypesToResilience;
 	// TArray<FGameplayTag> DamageTypes;
 
 	FGameplayTag Effects_HitReact;
-
-
 
 protected:
 

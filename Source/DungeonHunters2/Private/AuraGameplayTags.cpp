@@ -87,15 +87,34 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 		FName(TEXT("InputTag.4")),
 		FString("input tag for 4"));
 
+	/***
+	 * 蒙太奇事件通知标签
+	 */
 	GameplayTags.Event_Montage_FireBolt = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName(TEXT("Event.Montage.FireBolt")),
 		FString("FireBolt"));
 
+	// GameplayTags.Event_Montage_Attack_Melee = UGameplayTagsManager::Get().AddNativeGameplayTag(
+	// 	FName(TEXT("Event.Montage.Attack.Melee")),
+	// 	FString("Attack Melee"));
+
+	GameplayTags.Event_Montage_Attack_Weapon = UGameplayTagsManager::Get().AddNativeGameplayTag(
+	FName(TEXT("Event.Montage.Attack.Weapon")),
+	FString("Attack Weapon"));
+
+	GameplayTags.Event_Montage_Attack_RightHand = UGameplayTagsManager::Get().AddNativeGameplayTag(
+	FName(TEXT("Event.Montage.Attack.RightHand")),
+	FString("Attack RightHand"));
+
+	GameplayTags.Event_Montage_Attack_LeftHand = UGameplayTagsManager::Get().AddNativeGameplayTag(
+	FName(TEXT("Event.Montage.Attack.LeftHand")),
+	FString("Attack LeftHand"));
+	
+	// 伤害类型
 	GameplayTags.Damage = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName(TEXT("Damage")),
 		FString("Damage"));
-
-	// 伤害类型
+	
 	GameplayTags.Damage_Fire = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName(TEXT("Damage.Fire")),
 		FString("Damage Fire Type"));
@@ -137,6 +156,12 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 	GameplayTags.DamageTypesToResilience.Add(GameplayTags.Damage_Lightning,GameplayTags.Attributes_Resilience_Lightning);
 	GameplayTags.DamageTypesToResilience.Add(GameplayTags.Damage_Arcane,GameplayTags.Attributes_Resilience_Arcane);
 	GameplayTags.DamageTypesToResilience.Add(GameplayTags.Damage_Physical,GameplayTags.Attributes_Resilience_Physical);
+
+	
+
+	GameplayTags.Abilities_Attack = UGameplayTagsManager::Get().AddNativeGameplayTag(
+	FName(TEXT("Abilities.Attack")),
+	FString("Abilities Attack Tag"));
 
 	
 	GameplayTags.Effects_HitReact = UGameplayTagsManager::Get().AddNativeGameplayTag(

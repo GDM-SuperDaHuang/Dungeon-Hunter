@@ -37,7 +37,7 @@ void AAuraPlayerController::ShowDamageNumber_Implementation(float DamageAmount, 
 		DamageText->DetachFromComponent(FDetachmentTransformRules::KeepRelativeTransform);
 		//???
 		FVector SpawnLoc = TargetCharacter->GetActorLocation();
-		SpawnLoc.Z += 10.f;          // 离地 0.1 米
+		SpawnLoc.Z += 10.f; // 离地 0.1 米
 		DamageText->SetWorldLocation(SpawnLoc);
 
 		DamageText->SetDamageText(DamageAmount, bBlockedHit, bCriticalHit);
@@ -268,8 +268,12 @@ void AAuraPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 					Spline->AddSplinePoint(PointLoc, ESplineCoordinateSpace::World);
 					DrawDebugSphere(GetWorld(), PointLoc, 8, 8, FColor::Yellow, false, 5);
 				}
-				CachedDestination = NavPath->PathPoints[NavPath->PathPoints.Num() - 1];
-				bAutoRunning = true;
+
+				if (NavPath->PathPoints.Num() > 0)
+				{
+					CachedDestination = NavPath->PathPoints[NavPath->PathPoints.Num() - 1];
+					bAutoRunning = true;
+				}
 			}
 		}
 		FollowTime = 0.0f;

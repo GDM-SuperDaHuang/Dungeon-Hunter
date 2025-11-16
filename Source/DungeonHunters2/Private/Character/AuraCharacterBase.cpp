@@ -3,6 +3,7 @@
 
 #include "Character/AuraCharacterBase.h"
 #include "AbilitySystemComponent.h"
+#include "AuraGameplayTags.h"
 #include "AbilitySystem/AureAbilitySystemComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "DungeonHunters2/DungeonHunters2.h"
@@ -61,6 +62,7 @@ void AAuraCharacterBase::MulticastHandleDeath_Implementation()
 
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	Dissolve();
+	bDead = true;
 }
 
 void AAuraCharacterBase::BeginPlay()
@@ -69,10 +71,39 @@ void AAuraCharacterBase::BeginPlay()
 }
 
 // 供 GA 或 Task 调用的便捷函数：返回武器尖端位置
-FVector AAuraCharacterBase::GetCombatSocketLocation()
+FVector AAuraCharacterBase::GetCombatSocketLocation_Implementation(const FGameplayTag& MontageTag)
 {
-	check(Weapon);
-	return Weapon->GetSocketLocation(WeaponTipSocketName);
+	FAuraGameplayTags GameplayTags = FAuraGameplayTags::Get();
+	if (MontageTag.MatchesTagExact(GameplayTags.Event_Montage_Attack_Weapon) && IsValid(Weapon))
+	{
+		return Weapon->GetSocketLocation(WeaponTipSocketName);
+	}
+
+	if (MontageTag.MatchesTagExact(GameplayTags.Event_Montage_Attack_RightHand))
+	{
+		return GetMesh()->GetSocketLocation(RightHandSocketName);
+	}
+
+	if (MontageTag.MatchesTagExact(GameplayTags.Event_Montage_Attack_LeftHand))
+	{
+		return Weapon->GetSocketLocation(LeftHandSocketName);
+	}
+	return FVector::ZeroVector;
+}
+
+bool AAuraCharacterBase::IsDead_Implementation() const
+{
+	return bDead;
+}
+
+AActor* AAuraCharacterBase::GetAvatar_Implementation()
+{
+	return this;
+}
+
+TArray<FTaggedMontage> AAuraCharacterBase::GetAttackMontages_Implementation()
+{
+	return AttackMontages;
 }
 
 void AAuraCharacterBase::InitAbilityActorInfo()

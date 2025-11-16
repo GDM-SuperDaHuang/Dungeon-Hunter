@@ -53,10 +53,10 @@ void AAuraEnemy::PossessedBy(AController* NewController)
 	AuraAIController = Cast<AAuraAIController>(NewController);
 	AuraAIController->GetBlackboardComponent()->InitializeBlackboard(*BehaviorTree->BlackboardAsset);
 	AuraAIController->RunBehaviorTree(BehaviorTree);
-	AuraAIController->GetBlackboardComponent()->SetValueAsBool(FName("HitReacting"),false);
+	AuraAIController->GetBlackboardComponent()->SetValueAsBool(FName("HitReacting"), false);
 	// 远程攻击类型
-	AuraAIController->GetBlackboardComponent()->SetValueAsBool(FName("RangedAttacker"),CharacterClass != ECharacterClass::Warrior);
-	
+	AuraAIController->GetBlackboardComponent()->SetValueAsBool(FName("RangedAttacker"),
+	                                                           CharacterClass != ECharacterClass::Warrior);
 }
 
 /* -------------------- 接口实现 -------------------- */
@@ -89,6 +89,16 @@ void AAuraEnemy::Die()
 	Super::Die();
 }
 
+void AAuraEnemy::SetCombatTarget_Implementation(AActor* InCombatTarget)
+{
+	CombatTarget = InCombatTarget;
+}
+
+AActor* AAuraEnemy::GetCombatTarget_Implementation() const
+{
+	return CombatTarget;
+}
+
 
 void AAuraEnemy::BeginPlay()
 {
@@ -97,7 +107,7 @@ void AAuraEnemy::BeginPlay()
 	InitAbilityActorInfo();
 	if (HasAuthority())
 	{
-		UAuraAbilitySystemLibrary::GiveStartupAbilities(this, AbilitySystemComponent);
+		UAuraAbilitySystemLibrary::GiveStartupAbilities(this, AbilitySystemComponent, CharacterClass);
 	}
 
 
@@ -141,8 +151,13 @@ void AAuraEnemy::HitReactTagChanged(const FGameplayTag CallbackTag, int32 NewCou
 	bHitReacting = NewCount > 0;
 	//击中后，停止移动
 	GetCharacterMovement()->MaxWalkSpeed = bHitReacting ? 0.0f : BaseWalkSpeed;
-	AuraAIController->GetBlackboardComponent()->SetValueAsBool(FName("HitReacting"),bHitReacting);
 
+	if (AuraAIController && AuraAIController->GetBlackboardComponent())
+	{
+		AuraAIController->GetBlackboardComponent()->SetValueAsBool(FName("HitReacting"), bHitReacting);
+	}
+
+	
 }
 
 /* -------------------- ASC 初始化 -------------------- */

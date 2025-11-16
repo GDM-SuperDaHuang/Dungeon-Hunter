@@ -6,6 +6,7 @@
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
 #include "NiagaraFunctionLibrary.h"
+#include "AbilitySystem/AuraAbilitySystemLibrary.h"
 #include "Components/AudioComponent.h"
 #include "DungeonHunters2/DungeonHunters2.h"
 #include "GameFramework/ProjectileMovementComponent.h"
@@ -77,6 +78,11 @@ void AAuraProjectile::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, 
 	// ???
 	if (DamageEffectHandle.Data.IsValid() && DamageEffectHandle.Data.Get()->GetContext().GetEffectCauser() ==
 		OtherActor)
+	{
+		return;
+	}
+
+	if (!UAuraAbilitySystemLibrary::IsNotFriend(DamageEffectHandle.Data.Get()->GetContext().GetEffectCauser(),OtherActor))
 	{
 		return;
 	}
