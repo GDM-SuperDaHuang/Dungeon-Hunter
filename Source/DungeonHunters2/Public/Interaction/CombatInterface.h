@@ -38,6 +38,12 @@ class DUNGEONHUNTERS2_API ICombatInterface
 public:
 	virtual int32 GetPlayerLevel();
 
+	/**
+	 * BlueprintNativeEvent ：蓝图本地事件，(这样cpp可以调用蓝图方法）
+	 * 要求：cpp必须实现GetCombatSocketLocation_Implementation
+	 * 蓝图可以选择性重写：GetCombatSocketLocation方法
+	 * 使用ICombatInterface::Execute_GetCombatSocketLocation调用时候，优先调用 蓝图实现的，没有再调用cpp实现的。
+	 */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	FVector GetCombatSocketLocation(const FGameplayTag& MontageTag);
 

@@ -166,23 +166,49 @@ void UAuraAbilitySystemLibrary::SetCriticalHit(FGameplayEffectContextHandle& Eff
 	}
 }
 
-//??
+// 在 UAuraAbilitySystemLibrary 体内 -------------------------------------------------
+
+/**
+ * 球形范围查询：返回所有“活着”且实现了 ICombatInterface 的 Actor
+ *
+ * @param WorldContextObject	任意 UObject，用来拿 World
+ * @param OutOverlappingActors	输出数组，满足条件的结果会追加到这里（蓝图自动变成 ReturnValue）
+ * @param ActorsToIgnore			碰撞层面直接忽略的 Actor（通常把自己/队友传进来）
+ * @param Radius				     球体半径（cm）
+ * @param SphereOrigin			   球体中心（世界坐标）
+ *
+ * @note
+ *	1. 只扫描 ECC_WorldDynamic + ECC_Pawn 等“动态对象”通道；地形/静态网格会被过滤掉
+ *	2. 内部用 AddUnique 保证同一个 Actor 不会重复出现
+ *	3. 仅同步查询，无物理消耗；高频调用请自己做帧分摊或空间缓存
+ */
 void UAuraAbilitySystemLibrary::GetLivePlayersWithinRadius(const UObject* WorldContextObject,
                                                            TArray<AActor*>& OutOverlappingActors,
                                                            const TArray<AActor*>& ActorsToIgnore,
                                                            float Radius,
                                                            const FVector& SphereOrigin)
 {
+	// todo 0. 空输出数组先清掉，避免外部复用时不断累加
+	// OutOverlappingActors.Reset();
+
+	// todo 1. 拿 World
+	// UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull);
+	// if (!World) return;
+
+	// 2. 构造碰撞查询参数：只忽略调用方指定的 Actor
 	FCollisionQueryParams SphereParams;
 	SphereParams.AddIgnoredActors(ActorsToIgnore);
 
 	TArray<FOverlapResult> Overlaps;
 	if (UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull))
 	{
+		// 3. 同步球体重叠查询；FQuat::Identity 表示无旋转
+		// 只扫“动态对象”通道（Pawn、PhysicsBody、Vehicle 等）
 		World->OverlapMultiByObjectType(Overlaps, SphereOrigin, FQuat::Identity,
 		                                FCollisionObjectQueryParams(
 			                                FCollisionObjectQueryParams::InitType::AllDynamicObjects),
 		                                FCollisionShape::MakeSphere(Radius), SphereParams);
+		// 4. 遍历重叠结果，做“存活”过滤				
 		for (FOverlapResult& Overlap : Overlaps)
 		{
 			// const bool ImplementsCombatInterface = Overlap.GetActor()->Implements<UCombatInterface>();
@@ -190,6 +216,7 @@ void UAuraAbilitySystemLibrary::GetLivePlayersWithinRadius(const UObject* WorldC
 			if (Overlap.GetActor()->Implements<UCombatInterface>() && !ICombatInterface::Execute_IsDead(
 				Overlap.GetActor())) //没死
 			{
+				// 4-3. 加入结果（AddUnique 防止指针重复）
 				OutOverlappingActors.AddUnique(ICombatInterface::Execute_GetAvatar(Overlap.GetActor()));
 			}
 		}
