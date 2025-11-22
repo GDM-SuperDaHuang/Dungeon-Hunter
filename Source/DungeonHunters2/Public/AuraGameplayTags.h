@@ -41,6 +41,7 @@ public:
 	FGameplayTag Attributes_Resilience_Physical;
 
 
+
 	FGameplayTag InputTag_LMB;
 	FGameplayTag InputTag_RMB;
 	FGameplayTag InputTag_1;
@@ -52,9 +53,18 @@ public:
 	//蒙太奇事件通知标签
 	FGameplayTag Event_Montage_FireBolt;
 	// FGameplayTag Event_Montage_Attack_Melee;
-	FGameplayTag Event_Montage_Attack_Weapon;
-	FGameplayTag Event_Montage_Attack_RightHand;
-	FGameplayTag Event_Montage_Attack_LeftHand;
+	// CombatSocket_Weapon
+	FGameplayTag CombatSocket_Weapon;
+	FGameplayTag CombatSocket_RightHand;
+	FGameplayTag CombatSocket_LeftHand;
+	FGameplayTag CombatSocket_Tail;
+
+
+	// Montage tag
+	FGameplayTag Montage_Attack_1;
+	FGameplayTag Montage_Attack_2;
+	FGameplayTag Montage_Attack_3;
+	FGameplayTag Montage_Attack_4;
 
 
 	//伤害类型
@@ -63,12 +73,19 @@ public:
 	FGameplayTag Damage_Lightning;
 	FGameplayTag Damage_Arcane;
 	FGameplayTag Damage_Physical;
-
+	
 	FGameplayTag Abilities_Attack;
+	FGameplayTag Abilities_Summon;
+	
+
 	TMap<FGameplayTag, FGameplayTag> DamageTypesToResilience;
 	// TArray<FGameplayTag> DamageTypes;
 
 	FGameplayTag Effects_HitReact;
+	
+	//GameplayCue
+	FGameplayTag GameplayCue_MeleeImpact;
+	
 
 protected:
 

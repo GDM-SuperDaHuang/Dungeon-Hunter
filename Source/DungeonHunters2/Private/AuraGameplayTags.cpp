@@ -98,23 +98,50 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 	// 	FName(TEXT("Event.Montage.Attack.Melee")),
 	// 	FString("Attack Melee"));
 
-	GameplayTags.Event_Montage_Attack_Weapon = UGameplayTagsManager::Get().AddNativeGameplayTag(
-	FName(TEXT("Event.Montage.Attack.Weapon")),
-	FString("Attack Weapon"));
 
-	GameplayTags.Event_Montage_Attack_RightHand = UGameplayTagsManager::Get().AddNativeGameplayTag(
-	FName(TEXT("Event.Montage.Attack.RightHand")),
-	FString("Attack RightHand"));
+	/**
+	 *
+	 */
+	GameplayTags.CombatSocket_Weapon = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName(TEXT("Event.Montage.Attack.Weapon")),
+		FString("Attack Weapon"));
 
-	GameplayTags.Event_Montage_Attack_LeftHand = UGameplayTagsManager::Get().AddNativeGameplayTag(
-	FName(TEXT("Event.Montage.Attack.LeftHand")),
-	FString("Attack LeftHand"));
-	
+	GameplayTags.CombatSocket_RightHand = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName(TEXT("Event.Montage.Attack.RightHand")),
+		FString("Attack RightHand"));
+
+	GameplayTags.CombatSocket_LeftHand = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName(TEXT("Event.Montage.Attack.LeftHand")),
+		FString("Attack LeftHand"));
+
+	GameplayTags.CombatSocket_Tail = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName(TEXT("Event.Montage.Attack.Tail")),
+		FString("Attack Tail"));
+
+
+	//montage tag
+	GameplayTags.Montage_Attack_1 = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName(TEXT("Montage.Attack.1")),
+		FString("Montage Attack 1"));
+
+	GameplayTags.Montage_Attack_2 = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName(TEXT("Montage.Attack.2")),
+		FString("Montage Attack 2"));
+
+	GameplayTags.Montage_Attack_3 = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName(TEXT("Montage.Attack.3")),
+		FString("Montage Attack 3"));
+
+	GameplayTags.Montage_Attack_4 = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName(TEXT("Montage.Attack.4")),
+		FString("Montage Attack 4"));
+
+
 	// 伤害类型
 	GameplayTags.Damage = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName(TEXT("Damage")),
 		FString("Damage"));
-	
+
 	GameplayTags.Damage_Fire = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName(TEXT("Damage.Fire")),
 		FString("Damage Fire Type"));
@@ -152,19 +179,29 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 	/**
 	 * 抗性伤害map
 	 */
-	GameplayTags.DamageTypesToResilience.Add(GameplayTags.Damage_Fire,GameplayTags.Attributes_Resilience_Fire);
-	GameplayTags.DamageTypesToResilience.Add(GameplayTags.Damage_Lightning,GameplayTags.Attributes_Resilience_Lightning);
-	GameplayTags.DamageTypesToResilience.Add(GameplayTags.Damage_Arcane,GameplayTags.Attributes_Resilience_Arcane);
-	GameplayTags.DamageTypesToResilience.Add(GameplayTags.Damage_Physical,GameplayTags.Attributes_Resilience_Physical);
+	GameplayTags.DamageTypesToResilience.Add(GameplayTags.Damage_Fire, GameplayTags.Attributes_Resilience_Fire);
+	GameplayTags.DamageTypesToResilience.Add(GameplayTags.Damage_Lightning,
+	                                         GameplayTags.Attributes_Resilience_Lightning);
+	GameplayTags.DamageTypesToResilience.Add(GameplayTags.Damage_Arcane, GameplayTags.Attributes_Resilience_Arcane);
+	GameplayTags.DamageTypesToResilience.Add(GameplayTags.Damage_Physical, GameplayTags.Attributes_Resilience_Physical);
 
-	
 
 	GameplayTags.Abilities_Attack = UGameplayTagsManager::Get().AddNativeGameplayTag(
-	FName(TEXT("Abilities.Attack")),
-	FString("Abilities Attack Tag"));
+		FName(TEXT("Abilities.Attack")),
+		FString("Abilities Attack Tag"));
 
-	
+
+	GameplayTags.Abilities_Summon = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName(TEXT("Abilities.Summon")),
+		FString("Abilities Summon Tag"));
+
+
 	GameplayTags.Effects_HitReact = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName(TEXT("Effects.HitReact")),
 		FString("Effects.HitReact"));
+
+	// GameplayCue 类型标签
+	GameplayTags.GameplayCue_MeleeImpact = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName(TEXT("GameplayCue.MeleeImpact")),
+		FString("GameplayCue MeleeImpact"));
 }

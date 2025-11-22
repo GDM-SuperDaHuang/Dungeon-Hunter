@@ -36,13 +36,12 @@ protected:
 	 * 负责计算发射位置、生成投射物实例、设置投射物属性（如伤害、速度）
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Projectile")
-	void SpawnProjectile(const FVector& ProjectileTargetLocation);
-	
+	void SpawnProjectile(const FVector& ProjectileTargetLocation, const FGameplayTag& SocketTag);
+
 	/**
 	 * 投射物的类模板（在编辑器中指定，如AFireballProjectile、IColdArrowProjectile）
 	 * 技能激活时会根据此模板生成具体的投射物Actor
 	 */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TSubclassOf<AAuraProjectile> ProjectileClass;
-
 };

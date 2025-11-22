@@ -188,7 +188,7 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 	UAuraAbilitySystemLibrary::SetCriticalHit(EffectContextHandle, bCriticalHit);
 
 	Damage = bCriticalHit ? 2.f * Damage + SourceCriticalHitDamage : Damage;
-	Damage = 5.f ;
+	Damage = 5 ;
 	UE_LOG(LogTemp, Warning, TEXT("======Damage: %f"), Damage);
 	const FGameplayModifierEvaluatedData EffectData(UAureAttributeSet::GetIncomingDamageAttribute(),
 	                                                EGameplayModOp::Additive, Damage);
