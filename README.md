@@ -1,5 +1,89 @@
 # Dungeon-Hunter
 ue5
+Animation:动画
+AnimGraph（动画图）
+这是 AnimInstance 中最核心的一部分。
+    ✔ AnimGraph 负责：
+        组合不同动画姿势（Blend）
+        控制动画切换
+        调用状态机
+        调用 Slot 播放 Montage
+        IK、FABRIK、AimOffset 等节点
+        输出最终姿势
+
+AnimGraph 输出的最终 Pose
+    |
+    |-- State Machine（走路、跑步、跳跃）
+    |
+    |-- Slot (播放攻击、受击 Montage)
+    |
+    |-- IK、Ragdoll、Layered blend per bone
+    |
+    ----> 输出Final Animation Pose
+
+State Machine（状态机）
+    状态机是 AnimGraph 里面的一个节点。
+    用途：管理“移动相关”或“流程状态相关”的动画逻辑。
+    常见状态：
+    Idle
+    ↓
+    Walk
+    ↓
+    Run
+    ↓
+    JumpStart → JumpLoop → JumpEnd
+    ↓
+    Land
+
+Slot（插槽）与 DefaultSlot
+Slot 是专门用来播放 Montage（动作专辑） 的。
+    ✔ Slot 典型用途：
+        攻击动画
+        技能动画
+        受击动画
+        开枪动作
+        换弹动画
+        表情动画
+        Slot 会插入在 AnimGraph 某个位置，使 montage 能覆盖或混合基础动画。
+ 
+eg:       
+基本移动状态（来自 State Machine）
+          ↓
+Montage Slot（DefaultSlot）
+          ↓
+Layered blend per bone（上半身）
+
+
+如果你不创建自己的 Slot，那么播放 Montage 都会走 DefaultSlot。
+✔ Slot 的执行优先级比状态机高。
+    状态机是基础动作：走、跑、跳。
+    Slot 是瞬时动作：攻击、受击、开枪。
+
+⭐ 三者之间的关系（非常关键）
+    1）AnimInstance
+    动画逻辑 + 动画图执行
+    （最顶层程序）
+
+    2）AnimGraph
+    控制最终输出哪种动画
+    （主树）
+
+    3）State Machine
+    移动状态控制
+    （底层Pose来源）
+
+    4）Slot
+    Montage 播放（优先级覆盖状态机）
+    （用于技能/攻击/受击）
+
+| 名称                    | 作用                 | 用途                                 |
+| ---------------------- | ---------------------| ------------------------------------ |
+| **AnimInstance**       | 动画蓝图的代码逻辑类  | 运行 AnimGraph、管理技能动画、参数更新 |
+| **AnimGraph**          | 最终动画输出管线      | 混合、IK、状态机、Montage、Slot       |
+| **State Machine**      | 管理角色移动/姿态状态 | Idle/Run/Jump 等持续动画             |
+| **Slot / DefaultSlot** | 播放 Montage         | 攻击、技能、受击、开枪                |
+
+
 
 
 ASC：
@@ -52,7 +136,45 @@ UGameplayAbility下的NetExecutionPolicy模式：它有4个成员变量
 
 
 
+标签设置:
+1. 资产标签（Ability Tags）
+    GA 自身的“身份证”，可多个。
+    描述该能力自身的身份、类型、分类。
+    如：
+    Ability.Attack.Melee
+    Ability.Skill.Fireball
 
+    AbilityTags为能力的成员变量
+    AbilityTags.AddTag(FGameplayTag::RequestGameplayTag(TEXT("Ability.Attack.Melee")));
+    AbilityTags.AddTag(FGameplayTag::RequestGameplayTag(TEXT("Ability.Type.Skill")));
+
+
+2. 取消带标签的能力（Cancel Abilities With Tags）
+    当这个能力激活时，会主动取消所有(资产标签)具有这些标签的能力,一激活就执行一次扫表打断
+    如果Cancel Abilities With Tags==Ability.Attack,那么正在进行中、拥有 Ability.Attack 标签的技能，立即被中断并强制 EndAbility。
+
+3. 用标签阻止能力（Block Abilities With Tags）
+    当此能力 正在激活 时，它会阻止拥有这些标签(资产标签)的能力尝试激活,任何试图进入激活流程且带匹配标签的 GA（已激活的不受影响）,只要本 GA 还处于 “Active” 就把它们挡在 CanActivate 之外 
+
+4. 激活标签已拥有的能力（Activation Owned Tags）
+    当该能力 成功激活后，这些标签被加到角色 ASC 上，能力结束时自动移除。
+
+5. 激活标签所需标签（Activation Required Tags）
+    激活能力前，ASC 上 必须拥有这些标签。如果缺少 → 不能激活。
+
+6. 激活阻止标签（Activation Blocked Tags）
+    如果角色 ASC 拥有这些标签，则能力 不能激活。
+
+7. 源所需标签（Source Required Tags）
+    技能施法者必须拥有这些标签，能力才可以执行其效果。
+
+8. 目标所需标签（Target Required Tags）
+    目标必须有这些标签，技能效果才能生效。
+    用于：
+    ·组合技
+    ·特定状态触发效果
+9. 目标被阻止标签（Target Blocked Tags）
+    如果目标拥有这些标签，则技能效果不会生效。
 
 
 
