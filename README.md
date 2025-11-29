@@ -53,6 +53,8 @@ Montage Slot（DefaultSlot）
           ↓
 Layered blend per bone（上半身）
 
+最终Pose = StateMachine + Slot(Montage)
+
 
 如果你不创建自己的 Slot，那么播放 Montage 都会走 DefaultSlot。
 ✔ Slot 的执行优先级比状态机高。
