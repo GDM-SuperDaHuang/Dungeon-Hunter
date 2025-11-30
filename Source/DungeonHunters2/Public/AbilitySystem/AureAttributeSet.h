@@ -81,7 +81,7 @@ public:
 
 	//方式4
 	// TMap<FGameplayTag, TBaseStaticDelegateInstance<FGameplayAttribute(), FDefaultDelegateUserPolicy>::FFuncPtr> TagsToAttributes;
-	
+
 	TMap<FGameplayTag, FAttributeFuncPtr<FGameplayAttribute()>> TagsToAttributes;
 
 	/*
@@ -148,7 +148,7 @@ public:
 	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_LightningResistance, Category="Resistance Attributes")
 	FGameplayAttributeData LightningResistance;
 	ATTRIBUTE_ACCESSORS(UAureAttributeSet, LightningResistance);
-	
+
 	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_ArcaneResistance, Category="Resistance Attributes")
 	FGameplayAttributeData ArcaneResistance;
 	ATTRIBUTE_ACCESSORS(UAureAttributeSet, ArcaneResistance);
@@ -182,6 +182,10 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category="Vital Attributes")
 	FGameplayAttributeData IncomingDamage;
 	ATTRIBUTE_ACCESSORS(UAureAttributeSet, IncomingDamage);
+
+	UPROPERTY(BlueprintReadOnly, Category="Vital Attributes")
+	FGameplayAttributeData IncomingXP;
+	ATTRIBUTE_ACCESSORS(UAureAttributeSet, IncomingXP);
 
 	/**
 	 * call black
@@ -245,4 +249,6 @@ private:
 	void SetEffectProperties(const struct FGameplayEffectModCallbackData& Data, FEffectProperties& props) const;
 
 	void ShowFloatingText(const FEffectProperties& Props, float Damage, bool bBlockedHit, bool bCriticalHit) const;
+
+	void SendXPEvent(const FEffectProperties& Props);
 };

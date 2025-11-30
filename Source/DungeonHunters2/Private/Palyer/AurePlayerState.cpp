@@ -8,17 +8,18 @@
 #include "AbilitySystem/AureAttributeSet.h"
 #include "Net/UnrealNetwork.h"
 
+
 AAurePlayerState::AAurePlayerState()
 {
 	//每秒更新100次
-	NetUpdateFrequency=100.0f;
+	NetUpdateFrequency = 100.0f;
 	// 这里ASC最大扫描和UAureAttributeSet进行绑定
-	AbilitySystemComponent=CreateDefaultSubobject<UAureAbilitySystemComponent>("AbilitySystemComponent");
-	AbilitySystemComponent->SetIsReplicated(true);	//复制
+	AbilitySystemComponent = CreateDefaultSubobject<UAureAbilitySystemComponent>("AbilitySystemComponent");
+	AbilitySystemComponent->SetIsReplicated(true); //复制
 	AbilitySystemComponent->SetReplicationMode(EGameplayEffectReplicationMode::Mixed);
-	
-	
-	AttributeSet=CreateDefaultSubobject<UAureAttributeSet>("AttributeSet");
+
+
+	AttributeSet = CreateDefaultSubobject<UAureAttributeSet>("AttributeSet");
 }
 
 void AAurePlayerState::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
@@ -29,7 +30,8 @@ void AAurePlayerState::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty
 	 * 第二个参数 Level是要复制的变量名。 
 	 * 使用getLevel就能获取到最新的Level
 	 */
-	DOREPLIFETIME(AAurePlayerState,Level);
+	DOREPLIFETIME(AAurePlayerState, Level);
+	DOREPLIFETIME(AAurePlayerState, XP);
 }
 
 UAbilitySystemComponent* AAurePlayerState::GetAbilitySystemComponent() const
@@ -37,7 +39,36 @@ UAbilitySystemComponent* AAurePlayerState::GetAbilitySystemComponent() const
 	return AbilitySystemComponent;
 }
 
-void AAurePlayerState::OnRep_Level()
+void AAurePlayerState::AddToXp(int32 InXP)
 {
-	
+	XP += InXP;
+	OnXpChangedDelegate.Broadcast(XP);
+}
+
+void AAurePlayerState::AddTolevel(int32 InLevel)
+{
+	Level += InLevel;
+	OnLevelChangedDelegate.Broadcast(Level);
+}
+
+void AAurePlayerState::SetXP(int32 InXp)
+{
+	XP = InXp;
+	OnXpChangedDelegate.Broadcast(XP);
+}
+
+void AAurePlayerState::SetLevel(int32 InLevel)
+{
+	Level = InLevel;
+	OnLevelChangedDelegate.Broadcast(Level);
+}
+
+void AAurePlayerState::OnRep_Level(int32 OldValue)
+{
+	OnLevelChangedDelegate.Broadcast(Level);
+}
+
+void AAurePlayerState::OnRep_XP(int32 OldValue)
+{
+	OnXpChangedDelegate.Broadcast(XP);
 }

@@ -41,6 +41,9 @@ public:
 	FGameplayTag Attributes_Resilience_Physical;
 
 
+	FGameplayTag Attributes_Meta_IncomingXp;
+
+
 
 	FGameplayTag InputTag_LMB;
 	FGameplayTag InputTag_RMB;
@@ -76,6 +79,12 @@ public:
 	
 	FGameplayTag Abilities_Attack;
 	FGameplayTag Abilities_Summon;
+
+	FGameplayTag Abilities_Fire_FireBolt;
+
+	FGameplayTag Cooldown_Fire_FireBolt;
+
+
 	
 
 	TMap<FGameplayTag, FGameplayTag> DamageTypesToResilience;

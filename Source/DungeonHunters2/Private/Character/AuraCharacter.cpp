@@ -22,6 +22,8 @@ AAuraCharacter::AAuraCharacter()
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
 	bUseControllerRotationRoll = false;
+
+	CharacterClass = ECharacterClass::Elementalist;
 }
 
 void AAuraCharacter::PossessedBy(AController* NewController)
@@ -68,20 +70,20 @@ void AAuraCharacter::InitAbilityActorInfo()
 	AurePlayerState->GetAbilitySystemComponent()->InitAbilityActorInfo(AurePlayerState, this);
 
 	// 4. 通知 ASC 内部完成初始化（注册回调、广播 AssetTag）
-	UAureAbilitySystemComponent* AureASC = Cast<UAureAbilitySystemComponent>(AurePlayerState->GetAbilitySystemComponent());
+	UAureAbilitySystemComponent* AureASC = Cast<UAureAbilitySystemComponent>(
+		AurePlayerState->GetAbilitySystemComponent());
 	// check(AureASC); // 验证转换结果，确保非空
 	AureASC->AbilityActorInfoSet();
 	AbilitySystemComponent = AurePlayerState->GetAbilitySystemComponent();
 	AttributeSet = AurePlayerState->GetAttributeSet();
-	
+
 	// 5. 初始化 HUD（仅本地玩家）
 	if (AAuraPlayerController* AuraPlayerController = Cast<AAuraPlayerController>(GetController()))
 	{
 		if (AAuraHUD* AuraHUD = Cast<AAuraHUD>(AuraPlayerController->GetHUD()))
 		{
-			AuraHUD->InitOverlay(AuraPlayerController,AurePlayerState,AbilitySystemComponent,AttributeSet);
+			AuraHUD->InitOverlay(AuraPlayerController, AurePlayerState, AbilitySystemComponent, AttributeSet);
 		}
-		
 	}
 
 	// 6. 刷默认属性 GE（服务器才执行）

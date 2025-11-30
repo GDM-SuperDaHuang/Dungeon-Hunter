@@ -7,6 +7,7 @@
 #include "GameFramework/PlayerState.h"
 #include "AurePlayerState.generated.h"
 
+class ULevelUpInfo;
 class UAbilitySystemComponent;
 class UAttributeSet;
 
@@ -25,6 +26,8 @@ class UAttributeSet;
  * 
  */
 
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnplayStateChaned, int32)
+
 UCLASS()
 class DUNGEONHUNTERS2_API AAurePlayerState : public APlayerState, public IAbilitySystemInterface
 {
@@ -38,10 +41,26 @@ public:
 	/*** IAbilitySystemInterface */
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 	/*** IAbilitySystemInterface end*/
-	
+
 	FORCEINLINE UAttributeSet* GetAttributeSet() const { return AttributeSet; }
 
+
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<ULevelUpInfo> LevelUpInfo;
+
+	FOnplayStateChaned OnXpChangedDelegate;
+	FOnplayStateChaned OnLevelChangedDelegate;
+
 	int32 GetPlayerLevel() const { return Level; }
+
+	int32 GetXP() const { return XP; }
+
+	void AddToXp(int32 InXP);
+	void AddTolevel(int32 InLevel);
+
+	void SetXP(int32 InXp);
+	void SetLevel(int32 InLevel);
+
 protected:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UAbilitySystemComponent> AbilitySystemComponent;
@@ -49,11 +68,16 @@ protected:
 	TObjectPtr<UAttributeSet> AttributeSet;
 
 private:
-
 	//如果只是使用了 DOREPLIFETIME而没有使用 ReplicatedUsing，那么当属性复制到客户端时，客户端会更新该属性的值，但不会触发任何回调函数。你只能通过直接访问该属性来获取更新后的值。
 	UPROPERTY(VisibleAnywhere, ReplicatedUsing=OnRep_Level)
 	int32 Level = 1;
 
+	UPROPERTY(VisibleAnywhere, ReplicatedUsing=OnRep_XP)
+	int32 XP = 1;
+
 	UFUNCTION()
-	void OnRep_Level();
+	void OnRep_Level(int32 OldValue);
+
+	UFUNCTION()
+	void OnRep_XP(int32 OldValue);
 };

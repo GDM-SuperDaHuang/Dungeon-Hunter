@@ -4,6 +4,7 @@
 #include "AbilitySystem/AureAbilitySystemComponent.h"
 #include "AbilitySystem/Ability/AuraGameplayAbility.h"
 #include "AuraGameplayTags.h"
+#include "DungeonHunters2/AuraLogChannels.h"
 
 void UAureAbilitySystemComponent::AbilityActorInfoSet()
 {
@@ -16,7 +17,7 @@ void UAureAbilitySystemComponent::AbilityActorInfoSet()
 	 * 如，ApplyGameplayEffectSpecToSelf，SetNumericAttributeBase，ASC->ApplyModToAttribute的调用 会触发,AttributeSet->SetHealth()不会触发
 	 */
 	OnGameplayEffectAppliedDelegateToSelf.AddUObject(this, &UAureAbilitySystemComponent::ClientEffectApplied);
-} 
+}
 
 /**
  * 服务器在角色生成时调用，把初始技能（GA）喂给 ASC
@@ -41,10 +42,23 @@ void UAureAbilitySystemComponent::AddCharacterAbilities(const TArray<TSubclassOf
 			 * 3. 塞进 ActiveAbilitySpecs 数组
 			 * 4. 标记网络脏，客户端会收到复制包并本地生成影子 Spec
 			 */
-			GiveAbility(AbilitySpec);// 真正交给 ASC 管理
+			GiveAbility(AbilitySpec); // 真正交给 ASC 管理
 		}
-		
+
 		// GiveAbilityAndActivateOnce(AbilitySpec);
+	}
+	bStartUpAbilitiesGiven = true;
+	AbilitiesGivenDelegate.Broadcast(this);
+}
+
+void UAureAbilitySystemComponent::AddCharacterPassiveAbilities(
+	const TArray<TSubclassOf<UGameplayAbility>>& StartUpAbility)
+{
+	for (const TSubclassOf<UGameplayAbility> AbilityClass : StartUpAbility)
+	{
+		// 创建技能规格（Spec），Level 1，默认不给予输入
+		FGameplayAbilitySpec AbilitySpec = FGameplayAbilitySpec(AbilityClass, 1);
+		GiveAbilityAndActivateOnce(AbilitySpec);
 	}
 }
 
@@ -67,11 +81,10 @@ void UAureAbilitySystemComponent::AbilityInputTagHeld(const FGameplayTag& InputT
 			// 如果技能没激活，则尝试激活（服务器仲裁）
 			if (!AbilitySpec.IsActive())
 			{
-				TryActivateAbility(AbilitySpec.Handle);//释放技能
+				TryActivateAbility(AbilitySpec.Handle); //释放技能
 			}
 		}
 	}
-	
 }
 
 
@@ -92,6 +105,62 @@ void UAureAbilitySystemComponent::AbilityInputTagReleased(const FGameplayTag& In
 	}
 }
 
+void UAureAbilitySystemComponent::FForEachAbility(const ::FForEachAbility& Delegate)
+{
+	FScopedAbilityListLock ActiveScopeLock(*this);
+	for (FGameplayAbilitySpec AbilitySpec : GetActivatableAbilities())
+	{
+		if (!Delegate.ExecuteIfBound(AbilitySpec))
+		{
+			UE_LOG(LogAura, Error,
+			       TEXT("UAureAbilitySystemComponent::FForEachAbility execution failed in %hs"), __FUNCTION__);
+		}
+	}
+}
+
+FGameplayTag UAureAbilitySystemComponent::GetAbilityTagFromSpec(const FGameplayAbilitySpec& AbilitySpec)
+{
+	if (AbilitySpec.Ability)
+	{
+		FGameplayTagContainer GameplayTags = AbilitySpec.Ability.Get()->AbilityTags;
+		for (FGameplayTag Tag : GameplayTags)
+		{
+			// ???
+			if (Tag.MatchesTag(FGameplayTag::RequestGameplayTag(FName("Abilities"))))
+			{
+				return Tag;
+			}
+		}
+	}
+
+	return FGameplayTag();
+}
+
+FGameplayTag UAureAbilitySystemComponent::GetInputTagFromSpec(const FGameplayAbilitySpec& AbilitySpec)
+{
+	for (FGameplayTag Tag : AbilitySpec.DynamicAbilityTags)
+	{
+		if (Tag.MatchesTag(FGameplayTag::RequestGameplayTag(FName("InputTag"))))
+		{
+			return Tag;
+		}
+	}
+
+	return FGameplayTag();
+}
+
+void UAureAbilitySystemComponent::OnRep_ActivateAbilities()
+{
+	Super::OnRep_ActivateAbilities();
+
+	//广播一次
+	if (!bStartUpAbilitiesGiven)
+	{
+		bStartUpAbilitiesGiven = true;
+		AbilitiesGivenDelegate.Broadcast(this);
+	}
+}
+
 /**
  * 因为 UFUNCTION(Client, Reliable)的缘故，只会让其中一个客户端发生回调。
  * 只要 权威端 通过 任何 ApplyGameplayEffect 接口* 把 带 AssetTag 的 GE 施加到 目标 ASC，就会 在网络包到达客户端时 由 引擎复制系统 自动触发 ClientEffectApplied_Implementation
@@ -109,8 +178,8 @@ void UAureAbilitySystemComponent::AbilityInputTagReleased(const FGameplayTag& In
  * UAbilitySystemComponent ：被施加 GE 的那个 ASC 实例本身（客户端的ASC，即自己）
  */
 void UAureAbilitySystemComponent::ClientEffectApplied_Implementation(UAbilitySystemComponent* AbilitySystemComponent,
-                                                const FGameplayEffectSpec& EffectSpec,
-                                                FActiveGameplayEffectHandle ActiveEffectHandle)
+                                                                     const FGameplayEffectSpec& EffectSpec,
+                                                                     FActiveGameplayEffectHandle ActiveEffectHandle)
 {
 	// GEngine->AddOnScreenDebugMessage(1,8.f,FColor::Blue,FString("EffectApplied"));
 	FGameplayTagContainer TagContainer;

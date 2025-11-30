@@ -176,6 +176,14 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 		FName(TEXT("Damage.Resilience.Physical")),
 		FString("Damage ResiliencePhysical Physical Type"));
 
+
+	/** mata */
+	GameplayTags.Attributes_Meta_IncomingXp = UGameplayTagsManager::Get().AddNativeGameplayTag(
+			FName(TEXT("Attributes.Meta.IncomingXp")),
+			FString("Attributes Meta IncomingXp Tag"));
+
+	
+	
 	/**
 	 * 抗性伤害map
 	 */
@@ -195,6 +203,19 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 		FName(TEXT("Abilities.Summon")),
 		FString("Abilities Summon Tag"));
 
+	GameplayTags.Abilities_Fire_FireBolt = UGameplayTagsManager::Get().AddNativeGameplayTag(
+	FName(TEXT("Abilities.Fire.FireBolt")),
+	FString("Abilities Fire FireBolt Tag"));
+
+
+	/**
+	 * Cooldown
+	 */
+	GameplayTags.Cooldown_Fire_FireBolt = UGameplayTagsManager::Get().AddNativeGameplayTag(
+	FName(TEXT("Cooldown.Fire.FireBolt")),
+	FString("Cooldown Fire FireBolt Tag"));
+	
+	
 
 	GameplayTags.Effects_HitReact = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName(TEXT("Effects.HitReact")),

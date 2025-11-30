@@ -9,6 +9,7 @@
 #include "Net/UnrealNetwork.h"
 #include "AuraGameplayTags.h"
 #include "AbilitySystem/AuraAbilitySystemLibrary.h"
+#include "DungeonHunters2/AuraLogChannels.h"
 #include "Interaction/CombatInterface.h"
 #include "Kismet/GameplayStatics.h"
 #include "Palyer/AuraPlayerController.h"
@@ -186,11 +187,31 @@ void UAureAttributeSet::ShowFloatingText(const FEffectProperties& Props, float D
 			PC->ShowDamageNumber(Damage, Props.TargetCharacter, bBlockedHit, bCriticalHit);
 			return;
 		}
-		
+
 		if (AAuraPlayerController* TargetPC = Cast<AAuraPlayerController>(Props.TargetCharacter->Controller))
 		{
 			TargetPC->ShowDamageNumber(Damage, Props.TargetCharacter, bBlockedHit, bCriticalHit);
 		}
+	}
+}
+
+void UAureAttributeSet::SendXPEvent(const FEffectProperties& Props)
+{
+	if (ICombatInterface* CombatInterface = Cast<ICombatInterface>(Props.TargetCharacter))
+	{
+		int32 TargetLevel = CombatInterface->GetPlayerLevel();
+		ECharacterClass TargetClass = ICombatInterface::Execute_GetCharacterClass(Props.TargetCharacter);
+		int32 XPReward = UAuraAbilitySystemLibrary::GetXPRewardForClassAndLevel(
+			Props.SourceCharacter, TargetClass, TargetLevel);
+
+		FAuraGameplayTags GameplayTags = FAuraGameplayTags::Get();
+		FGameplayEventData Payload;
+		Payload.EventTag = GameplayTags.Attributes_Meta_IncomingXp;
+		Payload.EventMagnitude = XPReward;
+
+
+		UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(Props.SourceCharacter,
+		                                                         GameplayTags.Attributes_Meta_IncomingXp, Payload);
 	}
 }
 
@@ -232,6 +253,7 @@ void UAureAttributeSet::PostGameplayEffectExecute(const struct FGameplayEffectMo
 				{
 					CombatInterface->Die();
 				}
+				SendXPEvent(Props);
 			}
 			else
 			{
@@ -247,18 +269,25 @@ void UAureAttributeSet::PostGameplayEffectExecute(const struct FGameplayEffectMo
 		}
 	}
 
-	if (Data.EvaluatedData.Attribute == GetHealthAttribute())
+	if (Data.EvaluatedData.Attribute == GetIncomingXPAttribute())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("MaxHealth=%f"), GetMaxHealth());
-		UE_LOG(LogTemp, Warning, TEXT("Health=%f"), GetHealth());
-		UE_LOG(LogTemp, Warning, TEXT("Magnitude=%f"), Data.EvaluatedData.Magnitude);
+		const float LocalIncomingXP = GetIncomingXP();
+		SetIncomingXP(0);
+		UE_LOG(LogAura, Log, TEXT("XP=%f"), GetIncomingXP());
 	}
-	if (Data.EvaluatedData.Attribute == GetManaAttribute())
-	{
-		UE_LOG(LogTemp, Warning, TEXT("MaxMana=%f"), GetMaxMana());
-		UE_LOG(LogTemp, Warning, TEXT("Mana=%f"), GetMana());
-		UE_LOG(LogTemp, Warning, TEXT("Magnitude=%f"), Data.EvaluatedData.Magnitude);
-	}
+
+	// if (Data.EvaluatedData.Attribute == GetHealthAttribute())
+	// {
+	// 	UE_LOG(LogTemp, Warning, TEXT("MaxHealth=%f"), GetMaxHealth());
+	// 	UE_LOG(LogTemp, Warning, TEXT("Health=%f"), GetHealth());
+	// 	UE_LOG(LogTemp, Warning, TEXT("Magnitude=%f"), Data.EvaluatedData.Magnitude);
+	// }
+	// if (Data.EvaluatedData.Attribute == GetManaAttribute())
+	// {
+	// 	UE_LOG(LogTemp, Warning, TEXT("MaxMana=%f"), GetMaxMana());
+	// 	UE_LOG(LogTemp, Warning, TEXT("Mana=%f"), GetMana());
+	// 	UE_LOG(LogTemp, Warning, TEXT("Magnitude=%f"), Data.EvaluatedData.Magnitude);
+	// }
 }
 
 /******************************************
