@@ -42,6 +42,14 @@ void AAuraCharacter::OnRep_PlayerState()
 	InitAbilityActorInfo();
 }
 
+void AAuraCharacter::AddToXP_Implementation(int32 InXP)
+{
+	// 玩家等级存于 PlayerState，方便复制
+	AAurePlayerState* AurePlayerState = GetPlayerState<AAurePlayerState>();
+	check(AurePlayerState);
+	AurePlayerState->AddToXp(InXP);
+}
+
 /* ========== 等级接口 ========== */
 int32 AAuraCharacter::GetPlayerLevel()
 {
