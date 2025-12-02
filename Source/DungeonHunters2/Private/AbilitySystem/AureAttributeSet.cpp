@@ -11,6 +11,7 @@
 #include "AbilitySystem/AuraAbilitySystemLibrary.h"
 #include "DungeonHunters2/AuraLogChannels.h"
 #include "Interaction/CombatInterface.h"
+#include "Interaction/PlayerInterface.h"
 #include "Kismet/GameplayStatics.h"
 #include "Palyer/AuraPlayerController.h"
 
@@ -275,6 +276,11 @@ void UAureAttributeSet::PostGameplayEffectExecute(const struct FGameplayEffectMo
 		const float LocalIncomingXP = GetIncomingXP();
 		SetIncomingXP(0);
 		UE_LOG(LogAura, Log, TEXT("XP=%f"), GetIncomingXP());
+		if (Props.SourceCharacter->Implements<UPlayerInterface>())
+		{
+			IPlayerInterface::Execute_AddToXP(Props.SourceCharacter, LocalIncomingXP);
+		}
+		
 	}
 
 	// if (Data.EvaluatedData.Attribute == GetHealthAttribute())
