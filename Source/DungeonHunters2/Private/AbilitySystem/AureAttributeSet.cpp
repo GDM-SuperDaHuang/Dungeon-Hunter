@@ -210,12 +210,13 @@ void UAureAttributeSet::SendXPEvent(const FEffectProperties& Props)
 		Payload.EventMagnitude = XPReward;
 
 
+		// 这里执行会触发 OnGameplayEvent(FGameplayTag EventTag, FGameplayEventData Payload) 方法的回调
 		UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(Props.SourceCharacter,
 		                                                         GameplayTags.Attributes_Meta_IncomingXp, Payload);
 	}
 }
 
-/* ---------- GE 执行完毕 ---------- */
+/* ---------- GE 执行完毕，本次 GE 对属性的数值修改已经“落袋”的回调 ---------- */
 void UAureAttributeSet::PostGameplayEffectExecute(const struct FGameplayEffectModCallbackData& Data)
 {
 	Super::PostGameplayEffectExecute(Data);
