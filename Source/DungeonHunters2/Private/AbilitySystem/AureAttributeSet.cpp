@@ -198,9 +198,9 @@ void UAureAttributeSet::ShowFloatingText(const FEffectProperties& Props, float D
 
 void UAureAttributeSet::SendXPEvent(const FEffectProperties& Props)
 {
-	if (ICombatInterface* CombatInterface = Cast<ICombatInterface>(Props.TargetCharacter))
+	if (Props.TargetCharacter->Implements<UCombatInterface>())
 	{
-		int32 TargetLevel = CombatInterface->GetPlayerLevel();
+		int32 TargetLevel = ICombatInterface::Execute_GetPlayerLevel(Props.TargetCharacter);
 		ECharacterClass TargetClass = ICombatInterface::Execute_GetCharacterClass(Props.TargetCharacter);
 		int32 XPReward = UAuraAbilitySystemLibrary::GetXPRewardForClassAndLevel(
 			Props.SourceCharacter, TargetClass, TargetLevel);
@@ -275,11 +275,29 @@ void UAureAttributeSet::PostGameplayEffectExecute(const struct FGameplayEffectMo
 		const float LocalIncomingXP = GetIncomingXP();
 		SetIncomingXP(0);
 		UE_LOG(LogAura, Log, TEXT("XP=%f"), GetIncomingXP());
-		if (Props.SourceCharacter->Implements<UPlayerInterface>())
+		if (Props.SourceCharacter->Implements<UPlayerInterface>() &&
+			Props.SourceCharacter->Implements<UCombatInterface>())
 		{
+			const int32 CurLevel = ICombatInterface::Execute_GetPlayerLevel(Props.SourceCharacter);
+			const int32 CurXP = IPlayerInterface::Execute_GetXP(Props.SourceCharacter);
+			const int32 NewLevel = IPlayerInterface::Execute_FindLevelForXP(Props.SourceCharacter,CurXP+LocalIncomingXP);
+			const int32 NumLevelUps = NewLevel - CurLevel;
+			if (NumLevelUps > 0)
+			{
+				//add level, add spell point ,full health and Mana
+
+				const int32 AttributePointsReward = IPlayerInterface::Execute_GetAttributePointsReward(Props.SourceCharacter,CurLevel);
+				const int32 SpellPointsReward = IPlayerInterface::Execute_GetSpellPointsReward(Props.SourceCharacter,CurLevel);
+				IPlayerInterface::Execute_AddToPlayerLevel(Props.SourceCharacter,NumLevelUps);
+				IPlayerInterface::Execute_AddToAttributePoints(Props.SourceCharacter,AttributePointsReward);
+				IPlayerInterface::Execute_AddToSpellPoints(Props.SourceCharacter,SpellPointsReward);
+				bToOffHealth = true;
+				bToOffMana = true;
+				IPlayerInterface::Execute_LevelUp(Props.SourceCharacter);
+			}
+
 			IPlayerInterface::Execute_AddToXP(Props.SourceCharacter, LocalIncomingXP);
 		}
-		
 	}
 
 	// if (Data.EvaluatedData.Attribute == GetHealthAttribute())
@@ -294,6 +312,21 @@ void UAureAttributeSet::PostGameplayEffectExecute(const struct FGameplayEffectMo
 	// 	UE_LOG(LogTemp, Warning, TEXT("Mana=%f"), GetMana());
 	// 	UE_LOG(LogTemp, Warning, TEXT("Magnitude=%f"), Data.EvaluatedData.Magnitude);
 	// }
+}
+
+void UAureAttributeSet::PostAttributeChange(const FGameplayAttribute& Attribute, float OldValue, float NewValue)
+{
+	Super::PostAttributeChange(Attribute, OldValue, NewValue);
+	if (Attribute==GetHealthAttribute()&& bToOffHealth)
+	{
+		SetHealth(GetMaxHealth());
+		bToOffHealth = false;
+	}
+	if (Attribute==GetManaAttribute()&& bToOffMana)
+	{
+		SetMana(GetMaxMana());
+		bToOffMana = false;
+	}
 }
 
 /******************************************

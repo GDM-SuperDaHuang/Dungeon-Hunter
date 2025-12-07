@@ -4,14 +4,31 @@
 #include "Character/AuraCharacter.h"
 
 #include "AbilitySystemComponent.h"
+#include "NiagaraComponent.h"
 #include "AbilitySystem/AureAbilitySystemComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Palyer/AuraPlayerController.h"
+#include "AbilitySystem/Data/LevelUpInfo.h"
+#include "Camera/CameraComponent.h"
+#include "GameFramework/SpringArmComponent.h"
 #include "Palyer/AurePlayerState.h"
 #include "UI/HUD/AuraHUD.h"
 
 AAuraCharacter::AAuraCharacter()
 {
+	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
+	CameraBoom->SetupAttachment(GetRootComponent());
+	CameraBoom->SetUsingAbsoluteRotation(true);
+	CameraBoom->bDoCollisionTest = false;
+
+	TopDownCameraComponent = CreateDefaultSubobject<UCameraComponent>("TopDownCameraComponent");
+	TopDownCameraComponent->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
+	TopDownCameraComponent->bUsePawnControlRotation = false;
+
+	LevelNiagaraComponent = CreateDefaultSubobject<UNiagaraComponent>("LevelNiagaraComponent");
+	LevelNiagaraComponent->SetupAttachment(GetRootComponent());
+	LevelNiagaraComponent->bAutoActivate = false;
+
 	// === 移动组件调参（Diablo-Like 平面移动）==========================
 	GetCharacterMovement()->bOrientRotationToMovement = true; // 朝向速度方向
 	GetCharacterMovement()->RotationRate = FRotator(0.f, 400.f, 0.f);
@@ -50,8 +67,95 @@ void AAuraCharacter::AddToXP_Implementation(int32 InXP)
 	AurePlayerState->AddToXp(InXP);
 }
 
+void AAuraCharacter::LevelUp_Implementation()
+{
+	MulticastLevelUpParticles_Implementation();
+}
+
+void AAuraCharacter::MulticastLevelUpParticles_Implementation() const
+{
+	if (IsValid(LevelNiagaraComponent))
+	{
+		const FVector CameraLocation = TopDownCameraComponent->GetComponentLocation();
+		const FVector NiagaraLocation = LevelNiagaraComponent->GetComponentLocation();
+		UE::Math::TRotator<double> ToCameraRotation = (CameraLocation - NiagaraLocation).Rotation();
+		LevelNiagaraComponent->SetWorldRotation(ToCameraRotation);
+		LevelNiagaraComponent->Activate(true);
+	}
+}
+
+
+int32 AAuraCharacter::GetXP_Implementation() const
+{
+	// 玩家等级存于 PlayerState，方便复制
+	AAurePlayerState* AurePlayerState = GetPlayerState<AAurePlayerState>();
+	check(AurePlayerState);
+	return AurePlayerState->GetXP();
+}
+
+int32 AAuraCharacter::FindLevelForXP_Implementation(int32 InXP) const
+{
+	AAurePlayerState* AurePlayerState = GetPlayerState<AAurePlayerState>();
+	check(AurePlayerState);
+	return AurePlayerState->LevelUpInfo->FindLevelForXP(InXP);
+}
+
+int32 AAuraCharacter::GetAttributePointsReward_Implementation(int32 Level) const
+{
+	AAurePlayerState* AurePlayerState = GetPlayerState<AAurePlayerState>();
+	check(AurePlayerState);
+	return AurePlayerState->LevelUpInfo->LevelUpInformation[Level].AttributePointAward;
+}
+
+int32 AAuraCharacter::GetSpellPointsReward_Implementation(int32 Level) const
+{
+	AAurePlayerState* AurePlayerState = GetPlayerState<AAurePlayerState>();
+	check(AurePlayerState);
+	return AurePlayerState->LevelUpInfo->LevelUpInformation[Level].SpellPointAward;
+}
+
+void AAuraCharacter::AddToPlayerLevel_Implementation(int32 InPlayLevel)
+{
+	AAurePlayerState* AurePlayerState = GetPlayerState<AAurePlayerState>();
+	check(AurePlayerState);
+	AurePlayerState->AddTolevel(InPlayLevel);
+
+	if (UAureAbilitySystemComponent* AureASC = Cast<UAureAbilitySystemComponent>(GetAbilitySystemComponent()))
+	{
+		AureASC->UpdateAbilityStatuses(AurePlayerState->GetPlayerLevel());
+	}
+}
+
+void AAuraCharacter::AddToAttributePoints_Implementation(int32 InAttributePoints)
+{
+	AAurePlayerState* AurePlayerState = GetPlayerState<AAurePlayerState>();
+	check(AurePlayerState);
+	AurePlayerState->AddToAttributePoints(InAttributePoints);
+}
+
+void AAuraCharacter::AddToSpellPoints_Implementation(int32 InSpellPoints)
+{
+	AAurePlayerState* AurePlayerState = GetPlayerState<AAurePlayerState>();
+	check(AurePlayerState);
+	AurePlayerState->AddToSpellPoints(InSpellPoints);
+}
+
+int32 AAuraCharacter::GetAttributePoints_Implementation() const
+{
+	AAurePlayerState* AurePlayerState = GetPlayerState<AAurePlayerState>();
+	check(AurePlayerState);
+	return AurePlayerState->GetAttributePoints();
+}
+
+int32 AAuraCharacter::GetSpellPoints_Implementation() const
+{
+	AAurePlayerState* AurePlayerState = GetPlayerState<AAurePlayerState>();
+	check(AurePlayerState);
+	return AurePlayerState->GetSpellPoints();
+}
+
 /* ========== 等级接口 ========== */
-int32 AAuraCharacter::GetPlayerLevel()
+int32 AAuraCharacter::GetPlayerLevel_Implementation()
 {
 	// 玩家等级存于 PlayerState，方便复制
 	AAurePlayerState* AurePlayerState = GetPlayerState<AAurePlayerState>();

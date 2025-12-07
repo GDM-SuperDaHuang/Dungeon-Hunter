@@ -15,6 +15,7 @@ UCLASS()
 class DUNGEONHUNTERS2_API UAuraGameplayAbility : public UGameplayAbility
 {
 	GENERATED_BODY()
+
 public:
 	/**
 	 * 技能关联的输入标签（如"InputTag.LMB"对应左键，"InputTag.1"对应数字键1）
@@ -24,5 +25,12 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	FGameplayTag StartupInputTag;
 
+	virtual FString GetDescription(int32 Level);
+	virtual FString GetNextLevelDescription(int32 Level);
+	static FString GetLockedDescription(int32 Level);
+
+protected:
+	float GetManaCost(float InLevel = 1.f) const;
+	float GetCooldown(float InLevel = 1.f) const;
 
 };

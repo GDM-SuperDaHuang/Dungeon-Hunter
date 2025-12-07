@@ -41,10 +41,17 @@ float UMMC_MaxHealth::CalculateBaseMagnitude_Implementation(const FGameplayEffec
     );
 	*/
 	// ICombatInterface* CombatInterface = Cast<ICombatInterface>(Spec.GetContext().GetSourceObject());
-	UObject* SourceObject = Spec.GetContext().GetSourceObject();
+	// UObject* SourceObject = Spec.GetContext().GetSourceObject();
+	//
+	// ICombatInterface* CombatInterface = Cast<ICombatInterface>(SourceObject);
+	// const int32 PlayerLevel = CombatInterface->GetPlayerLevel();
+
+	int32 PlayerLevel =1;
+	if (Spec.GetContext().GetSourceObject()->Implements<UCombatInterface>())
+	{
+		PlayerLevel = ICombatInterface::Execute_GetPlayerLevel(Spec.GetContext().GetSourceObject());
+	}
 	
-	ICombatInterface* CombatInterface = Cast<ICombatInterface>(SourceObject);
-	const int32 PlayerLevel = CombatInterface->GetPlayerLevel();
 	// 步骤5: 计算最终最大生命值
 	return PlayerLevel * 10 + Vigor * 2 + 100;
 
