@@ -68,7 +68,7 @@ protected:
 	TObjectPtr<UAttributeSet> AttributeSet;
 
 private:
-	//如果只是使用了 DOREPLIFETIME而没有使用 ReplicatedUsing，那么当属性复制到客户端时，客户端会更新该属性的值，但不会触发任何回调函数。你只能通过直接访问该属性来获取更新后的值。
+	//如果只是使用了 DOREPLIFETIME 而没有使用 ReplicatedUsing ，那么当属性复制到客户端时，客户端会更新该属性的值，但不会触发任何回调函数。你只能通过直接访问该属性来获取更新后的值。
 	UPROPERTY(VisibleAnywhere, ReplicatedUsing=OnRep_Level)
 	int32 Level = 1;
 

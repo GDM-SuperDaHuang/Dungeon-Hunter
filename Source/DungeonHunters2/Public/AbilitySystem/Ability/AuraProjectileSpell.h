@@ -23,8 +23,8 @@ protected:
 	 * 重写技能激活函数，是技能逻辑的入口
 	 * 当技能被触发（如按下对应输入键）时调用
 	 * @param Handle：技能实例的句柄，用于标识当前激活的技能
-	 * @param ActorInfo：包含技能所属的Actor信息（如施法者、控制器）
-	 * @param ActivationInfo：激活相关的上下文信息（如预测键、激活次数）
+	 * @param ActorInfo：包含技能所属的Actor信息（如施法者、控制器，ASC等）
+	 * @param ActivationInfo：激活相关的上下文信息（如预测键、激活次数、Tag等）
 	 * @param TriggerEventData：触发技能的事件数据（如点击位置、目标信息）
 	 */
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,

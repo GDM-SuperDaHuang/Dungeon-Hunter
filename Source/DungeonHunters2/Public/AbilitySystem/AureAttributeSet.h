@@ -56,12 +56,12 @@ struct FEffectProperties
 // typedef TBaseStaticDelegateInstance<FGameplayAttribute(), FDefaultDelegateUserPolicy>::FFuncPtr FAttributeFuncPtr;
 //TMap<FGameplayTag, FAttributeFuncPtr> TagsToAttributes;
 
-//方式三
+//方式三 定义成员函数指针
 template <class T>
 using FAttributeFuncPtr = typename TBaseStaticDelegateInstance<T, FDefaultDelegateUserPolicy>::FFuncPtr;
 
 /**
- * 
+ * 存档/读档时 AttributeSet 不会持久化
  */
 UCLASS()
 class DUNGEONHUNTERS2_API UAureAttributeSet : public UAttributeSet

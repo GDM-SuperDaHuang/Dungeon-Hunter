@@ -64,7 +64,7 @@ void UAureAttributeSet::GetLifetimeReplicatedProps(TArray<class FLifetimePropert
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	/**
-	 * DOREPLIFETIME_CONDITION_NOTIFY 参数
+	 * DOREPLIFETIME_CONDITION_NOTIFY 参数,GAS专用宏
 	 * 1.当前类名
 	 * 2.属性名
 	 * 3.复制条件（COND_None/COND_OwnerOnly/COND_SkipOwner 等）
