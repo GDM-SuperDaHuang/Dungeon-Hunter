@@ -18,6 +18,7 @@ class DUNGEONHUNTERS2_API UAuraProjectileSpell : public UAuraDamageGameplayAbili
 
 public:
 
+
 protected:
 	/**
 	 * 重写技能激活函数，是技能逻辑的入口
@@ -44,4 +45,7 @@ protected:
 	 */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TSubclassOf<AAuraProjectile> ProjectileClass;
+
+	UPROPERTY(EditAnywhere)
+	int32 NumProjectiles = 5;
 };

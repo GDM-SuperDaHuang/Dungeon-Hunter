@@ -5,6 +5,7 @@
 
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
+#include "AuraGameplayTags.h"
 
 void UAuraDamageGameplayAbility::CauseDamage(AActor* TargetActor)
 {
@@ -18,11 +19,23 @@ void UAuraDamageGameplayAbility::CauseDamage(AActor* TargetActor)
 		*DamageSpecHandle.Data.Get(), UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(TargetActor));
 }
 
-FTaggedMontage UAuraDamageGameplayAbility::GetRandomTaggedMontageFromArray(const TArray<FTaggedMontage>& TaggedMontage) const
+FTaggedMontage UAuraDamageGameplayAbility::GetRandomTaggedMontageFromArray(
+	const TArray<FTaggedMontage>& TaggedMontage) const
 {
 	if (TaggedMontage.Num() > 0)
 	{
-		return  TaggedMontage[FMath::RandRange(0, TaggedMontage.Num() - 1)];
+		return TaggedMontage[FMath::RandRange(0, TaggedMontage.Num() - 1)];
 	}
 	return FTaggedMontage();
+}
+
+float UAuraDamageGameplayAbility::GetDamageByDamageType(float InLevel, const FGameplayTag& InDamageType) const
+{
+	bool bTagValid = InDamageType.IsValid();
+	if (!bTagValid)
+	{
+		return 1.f;
+	}
+
+	return 100;
 }

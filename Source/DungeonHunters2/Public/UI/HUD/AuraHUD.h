@@ -6,6 +6,7 @@
 #include "GameFramework/HUD.h"
 #include "AuraHUD.generated.h"
 
+class USpellMenuWidgetController;
 class UAttributeMenuWidgetController;
 class UOverlayWidgetController;
 class UAuraUserWidget;
@@ -27,6 +28,10 @@ public:
 
 	// 属性面板控制器的工厂函数，逻辑同上
 	UAttributeMenuWidgetController* GetAttributeMenuWidgetController(const FWidgetControllerParams& WCParams);
+	// 第一次调用时 NewObject 创建 Overlay 控制器并绑定依赖；后续直接返回同一实例
+	USpellMenuWidgetController* GetSpellMenuWidgetController(const FWidgetControllerParams& WCParams);
+
+	
 	
 	/* -------------------- 真正把 UI 塞进屏幕 -------------------- */
     // 由 AuraCharacter 在客户端初始化完毕后手动调用
@@ -63,5 +68,12 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UAttributeMenuWidgetController> UAttributeMenuWidgetControllerClass;
+
+	/* -------------------- 属性面板控制器 -------------------- */
+	UPROPERTY()
+	TObjectPtr<USpellMenuWidgetController> SpellMenuWidgetController;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<USpellMenuWidgetController> SpellMenuWidgetControllerClass;
 
 };

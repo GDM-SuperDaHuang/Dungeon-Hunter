@@ -45,7 +45,9 @@ class DUNGEONHUNTERS2_API ICombatInterface
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
-	virtual int32 GetPlayerLevel();
+	
+	UFUNCTION(BlueprintNativeEvent)
+	int32 GetPlayerLevel();
 
 	/**
 	 * BlueprintNativeEvent ：蓝图本地事件，(这样cpp可以调用蓝图方法）

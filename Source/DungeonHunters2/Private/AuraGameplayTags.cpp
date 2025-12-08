@@ -87,6 +87,14 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 		FName(TEXT("InputTag.4")),
 		FString("input tag for 4"));
 
+	GameplayTags.InputTag_Passive_1 = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName(TEXT("InputTag.Passive.1")),
+		FString("InputTag Passive 1"));
+
+	GameplayTags.InputTag_Passive_2 = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName(TEXT("InputTag.Passive.2")),
+		FString("InputTag Passive 2"));
+
 	/***
 	 * 蒙太奇事件通知标签
 	 */
@@ -179,11 +187,10 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 
 	/** mata */
 	GameplayTags.Attributes_Meta_IncomingXp = UGameplayTagsManager::Get().AddNativeGameplayTag(
-			FName(TEXT("Attributes.Meta.IncomingXp")),
-			FString("Attributes Meta IncomingXp Tag"));
+		FName(TEXT("Attributes.Meta.IncomingXp")),
+		FString("Attributes Meta IncomingXp Tag"));
 
-	
-	
+
 	/**
 	 * 抗性伤害map
 	 */
@@ -193,6 +200,11 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 	GameplayTags.DamageTypesToResilience.Add(GameplayTags.Damage_Arcane, GameplayTags.Attributes_Resilience_Arcane);
 	GameplayTags.DamageTypesToResilience.Add(GameplayTags.Damage_Physical, GameplayTags.Attributes_Resilience_Physical);
 
+
+	/*技能 */
+	GameplayTags.Abilities_None = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName(TEXT("Abilities.None")),
+		FString("Abilities None Tag"));
 
 	GameplayTags.Abilities_Attack = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName(TEXT("Abilities.Attack")),
@@ -204,18 +216,56 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 		FString("Abilities Summon Tag"));
 
 	GameplayTags.Abilities_Fire_FireBolt = UGameplayTagsManager::Get().AddNativeGameplayTag(
-	FName(TEXT("Abilities.Fire.FireBolt")),
-	FString("Abilities Fire FireBolt Tag"));
+		FName(TEXT("Abilities.Fire.FireBolt")),
+		FString("Abilities Fire FireBolt Tag"));
+
+	GameplayTags.Abilities_Lightning_Electrocute = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName(TEXT("Abilities.Lightning.Electrocute")),
+		FString("Abilities Lightning Electrocute"));
+
+	GameplayTags.Abilities_HitReact = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName(TEXT("Abilities.HitReact")),
+		FString("Abilities HitReact"));
+
+
+	/** 技能菜单状态 */
+	GameplayTags.Abilities_Status_Locked = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName(TEXT("Abilities.Status.Locked")),
+		FString("Abilities Status Locked"));
+
+	GameplayTags.Abilities_Status_Eligible = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName(TEXT("Abilities.Status.Eligible")),
+		FString("Abilities Status Eligible"));
+
+	GameplayTags.Abilities_Status_Unlocked = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName(TEXT("Abilities.Status.Unlocked")),
+		FString("Abilities Status Unlocked"));
+
+	GameplayTags.Abilities_Status_Equipped = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName(TEXT("Abilities.Status.Equipped")),
+		FString("Abilities Status Equipped"));
+
+
+	GameplayTags.Abilities_Type_Offensive = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName(TEXT("Abilities.Status.Offensive")),
+		FString("Abilities Status Offensive"));
+
+	GameplayTags.Abilities_Type_Passive = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName(TEXT("Abilities.Status.Passive")),
+		FString("Abilities Status Passive"));
+
+	GameplayTags.Abilities_Type_None = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName(TEXT("Abilities.Status.None")),
+		FString("Abilities Status None"));
 
 
 	/**
 	 * Cooldown
 	 */
 	GameplayTags.Cooldown_Fire_FireBolt = UGameplayTagsManager::Get().AddNativeGameplayTag(
-	FName(TEXT("Cooldown.Fire.FireBolt")),
-	FString("Cooldown Fire FireBolt Tag"));
-	
-	
+		FName(TEXT("Cooldown.Fire.FireBolt")),
+		FString("Cooldown Fire FireBolt Tag"));
+
 
 	GameplayTags.Effects_HitReact = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName(TEXT("Effects.HitReact")),

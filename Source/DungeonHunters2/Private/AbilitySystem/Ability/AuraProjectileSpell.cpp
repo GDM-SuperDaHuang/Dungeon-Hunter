@@ -24,7 +24,7 @@ void UAuraProjectileSpell::ActivateAbility(const FGameplayAbilitySpecHandle Hand
  * 2. 获取发射位置（通过战斗接口从武器 socket 获取）
  * 3. 生成投射物并设置初始状态
  */
-void UAuraProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocation,const FGameplayTag& SocketTag)
+void UAuraProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocation, const FGameplayTag& SocketTag)
 {
 	// 仅在服务器端生成投射物（网络同步：确保多端一致性，避免客户端各自生成）todo ???
 	bool bHasAuthority = GetAvatarActorFromActorInfo()->HasAuthority();
