@@ -137,7 +137,6 @@ UGameplayAbility下的NetExecutionPolicy模式：它有4个成员变量
 
 
 
-
 标签设置:
 1. 资产标签（Ability Tags）
     GA 自身的“身份证”，可多个。
@@ -178,7 +177,10 @@ UGameplayAbility下的NetExecutionPolicy模式：它有4个成员变量
 9. 目标被阻止标签（Target Blocked Tags）
     如果目标拥有这些标签，则技能效果不会生效。
 
-
+校验失败时可以手动执行如下函数，表示预测失败时，服务器调用，会触发回滚
+    EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, true);
+    EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, false);
+    AbilitySystemComponent->RejectAbility() 等价于 EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, true);
 
 
 

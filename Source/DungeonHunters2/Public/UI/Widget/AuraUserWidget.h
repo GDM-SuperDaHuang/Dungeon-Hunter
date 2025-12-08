@@ -23,7 +23,8 @@ public:
 
 protected:
 
-	//蓝图实现 对应蓝图的Event Widget Controller Set
+	//蓝图实现 对应蓝图的 Event Widget Controller Set
+	// 触发蓝图 Event Widget Controller Set 的回调
 	UFUNCTION(BlueprintImplementableEvent)
 	void WidgetControllerSet();
 };

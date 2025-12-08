@@ -93,9 +93,10 @@ void UTargetDataUnderMouse::SendMouseCursorData()
 		FGameplayTag(),// 无额外标签
 		AbilitySystemComponent->ScopedPredictionKey);
 
-	// 6. 如果该任务Task 仍然有效，广播 Blueprint 节点 
+	// 6. 如果该任务Task 仍然有效，广播 Blueprint 节点 ,下一步生成技能入口
 	if (ShouldBroadcastAbilityTaskDelegates())
 	{
+		// 准备释放技能（客户端自己触发，给自己看表现）
 		ValidData.Broadcast(DataHandle);
 	}
 }
@@ -112,6 +113,7 @@ void UTargetDataUnderMouse::OnTargetDataReplicatedCallback(const FGameplayAbilit
 	// 继续 Ability 执行，把数据抛给蓝图
 	if (ShouldBroadcastAbilityTaskDelegates())
 	{
+		// 准备释放技能（服务器触发，给其他了很多旁观者表现）
 		ValidData.Broadcast(DataHandle);
 	}
 }

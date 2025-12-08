@@ -9,9 +9,9 @@
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMouseTargetDataSignature, const FGameplayAbilityTargetDataHandle&,
                                             DataHandle);
 /**
- * 
+ * UAbilityTask 是Ability的专属协程， 当Ability执行 EndAbility时候会杀掉UAbilityTask
  */
-UCLASS()
+UCLASS()	
 class DUNGEONHUNTERS2_API UTargetDataUnderMouse : public UAbilityTask
 {
 	GENERATED_BODY()
@@ -22,6 +22,11 @@ public:
 	 * HidePin = "OwningAbility": 在蓝图中调用此函数时，将隐藏OwningAbility引脚。因为我们已经设置了DefaultToSelf，所以这个引脚不需要显示。
 	 * DefaultToSelf = "OwningAbility": 将调用此函数的对象（通常是当前的GameplayAbility）默认作为OwningAbility参数传入。这意味着在蓝图中，这个参数会自动填充为当前的Ability，不需要手动连接。
 	 * BlueprintInternalUseOnly = "true": 这个函数仅限蓝图内部使用，不会出现在节点的搜索列表中，只能通过特定方式（比如AbilityTask节点）调用。
+	 * 
+	 * 
+	 * cpp使用方式，在GA里面使用,this==GA_FireBolt
+	 * UTargetDataUnderMouse* Task = UTargetDataUnderMouse::CreatTargetDataUnderMouse(this);
+	 * Task->ValidData.AddUObject(this, &GA_FireBolt::OnTargetReady);
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Ability|Tasks",
 		meta=(DisplayName = "TargetDataUnderMouse", HidePin = "OwningAbility", DefaultToSelf = "OwningAbility",
