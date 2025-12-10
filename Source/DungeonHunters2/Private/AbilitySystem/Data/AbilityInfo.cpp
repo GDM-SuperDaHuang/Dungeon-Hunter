@@ -5,7 +5,7 @@
 
 #include "DungeonHunters2/AuraLogChannels.h"
 
-FAuraAbilityInfo UAbilityInfo::FindFAuraAbilityInfoForTag(const FGameplayTag& AttributeTag, bool bLogNotFound) const
+FAuraAbilityInfo UAbilityInfo::FindAbilityInfoForTag(const FGameplayTag& AttributeTag, bool bLogNotFound) const
 {
 	for (FAuraAbilityInfo Info : AbilityInformation)
 	{
