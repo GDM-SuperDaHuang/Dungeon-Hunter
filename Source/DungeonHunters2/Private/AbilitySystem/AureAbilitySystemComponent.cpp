@@ -227,19 +227,54 @@ void UAureAbilitySystemComponent::ServerUpgradeAttributes_Implementation(const F
 
 void UAureAbilitySystemComponent::UpdateAbilityStatuses(int32 Level)
 {
+	// 从 DataAsset 获取配技能配置AbilityInfo
 	UAbilityInfo* AbilityInfo = UAuraAbilitySystemLibrary::GetAbilityInfo(GetAvatarActor());
 	for (const FAuraAbilityInfo Info : AbilityInfo->AbilityInformation)
 	{
+		// 如果该技能没有能力标签（用于标识该技能），则跳过
 		if (!Info.AbilityTag.IsValid())continue;
 
+		 // 若玩家当前等级不足以解锁该技能（未达到 LevelRequirement），则跳过
 		if (Level < Info.LevelRequirement) continue;
 
+		// 检查 ASC 中是否已经有这个 Ability（通过技能标签查找 AbilitySpec）
+        // 如果返回 nullptr，说明玩家还没有获得/解锁这个技能
 		if (GetSpecFromAbilityTag(Info.AbilityTag) == nullptr)
 		{
+			// 创建一个 GameplayAbilitySpec，等级为 1
+            // 这里不使用 Gameplay Ability 的内部等级，而是把外部等级作为概率使用
 			FGameplayAbilitySpec AbilitySpec = FGameplayAbilitySpec(Info.Ability, 1);
+
+			// 添加一个动态 Tag（Abilities.Status.Equipped）
 			AbilitySpec.DynamicAbilityTags.AddTag(FAuraGameplayTags::Get().Abilities_Status_Equipped);
+
+			// 给 AbilitySystemComponent 添加这个 AbilitySpec
+            // 这里必须在服务器端调用，，
+			// todo这里有问题!!!!
+			// 先创建，等下再加标签
+							// FGameplayAbilitySpecHandle Handle = GiveAbility(AbilitySpec);
+							// // 取得 ASC 中真正的 AbilitySpec
+							// FGameplayAbilitySpec* GrantedSpec = FindAbilitySpecFromHandle(Handle);
+							// if (GrantedSpec)
+							// {
+							// 	// 添加动态标签（必须在真正的 Spec 上加）
+							// 	GrantedSpec->DynamicAbilityTags.AddTag(FAuraGameplayTags::Get().Abilities_Status_Equipped);
+
+							// 	// 标记脏 → 将变更同步给客户端
+							// 	MarkAbilitySpecDirty(*GrantedSpec);
+							// }
+
 			GiveAbility(AbilitySpec);
+
+			// **关键：标记 AbilitySpec 已被修改**
+            // 通知 ASC 需要把这一 Spec 发送到客户端（同步）
+			//是否修改了 AbilitySpec
+			// 是 → MarkAbilitySpecDirty
+			// 否 → 不要调用
 			MarkAbilitySpecDirty(AbilitySpec);
+
+			// RPC 调用：通知客户端 UI 更新技能图标状态、等级显示等
+            // （不会修改能力，只是 UI）
 			ClientUpdateAbilityStatus(Info.AbilityTag, FAuraGameplayTags::Get().Abilities_Status_Equipped, 1);
 		}
 	}
