@@ -61,32 +61,37 @@ void UAuraProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocati
 		Cast<APawn>(GetOwningActorFromActorInfo()),
 		ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
 
+	
 	//伤害计算
-	const UAbilitySystemComponent* SourceASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(
-		GetAvatarActorFromActorInfo());
-	FGameplayEffectContextHandle EffectContextHandle = SourceASC->MakeEffectContext();
-	EffectContextHandle.SetAbility(this);
-	EffectContextHandle.AddSourceObject(Projectile);
-	TArray<TWeakObjectPtr<AActor>> Actors;
-	Actors.Add(Projectile);
-	EffectContextHandle.AddActors(Actors);
-	FHitResult HitResult;
-	HitResult.Location = ProjectileTargetLocation;
-	EffectContextHandle.AddHitResult(HitResult);
+	// const UAbilitySystemComponent* SourceASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(
+	// 	GetAvatarActorFromActorInfo());
+	// FGameplayEffectContextHandle EffectContextHandle = SourceASC->MakeEffectContext();
+	// EffectContextHandle.SetAbility(this);
+	// EffectContextHandle.AddSourceObject(Projectile);
+	// TArray<TWeakObjectPtr<AActor>> Actors;
+	// Actors.Add(Projectile);
+	// EffectContextHandle.AddActors(Actors);
+	// FHitResult HitResult;
+	// HitResult.Location = ProjectileTargetLocation;
+	// EffectContextHandle.AddHitResult(HitResult);
+	//
+	// const FGameplayEffectSpecHandle SpecHandle = SourceASC->MakeOutgoingSpec(
+	// 	DamageEffectClass, GetAbilityLevel(), EffectContextHandle);
+	//
+	// FAuraGameplayTags GameplayTags = FAuraGameplayTags::Get();
+	// // 根据配置表等级获取对应的伤害值
+	// // for (TPair<FGameplayTag, FScalableFloat> Pair : DamageType)
+	// // {
+	// // 	const float ScaledDame = Pair.Value.GetValueAtLevel(GetAbilityLevel());
+	// // 	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, FString::Printf(TEXT("Damage: %f"), ScaledDame));
+	// // 	UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, Pair.Key, ScaledDame);
+	// // }
+	//
+	// const float ScaledDame = Damage.GetValueAtLevel(GetAbilityLevel());
+	// UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, DamageType, ScaledDame);
+	// Projectile->DamageEffectHandle = SpecHandle;
 
-	const FGameplayEffectSpecHandle SpecHandle = SourceASC->MakeOutgoingSpec(
-		DamageEffectClass, GetAbilityLevel(), EffectContextHandle);
-
-	FAuraGameplayTags GameplayTags = FAuraGameplayTags::Get();
-	// 根据配置表等级获取对应的伤害值
-	for (TPair<FGameplayTag, FScalableFloat> Pair : DamageType)
-	{
-		const float ScaledDame = Pair.Value.GetValueAtLevel(GetAbilityLevel());
-		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, FString::Printf(TEXT("Damage: %f"), ScaledDame));
-		UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, Pair.Key, ScaledDame);
-	}
-	Projectile->DamageEffectHandle = SpecHandle;
-
+	Projectile->DamageEffectParams = MakeDamageEffectParamsFromClassDefaults();
 
 	// SpawnActorDeferred需要FinishSpawning， 完成投射物生成（应用之前的设置，触发AAuraProjectile的BeginPlay）
 	Projectile->FinishSpawning(SpawnTransform);
