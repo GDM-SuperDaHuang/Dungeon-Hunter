@@ -155,6 +155,7 @@ FGameplayTag UAureAbilitySystemComponent::GetInputTagFromSpec(const FGameplayAbi
 	return FGameplayTag();
 }
 
+// 获取Abilities.Status前缀的的标签
 FGameplayTag UAureAbilitySystemComponent::GetStatusFromSpec(const FGameplayAbilitySpec& AbilitySpec)
 {
 	for (FGameplayTag StatusTag : AbilitySpec.DynamicAbilityTags)
