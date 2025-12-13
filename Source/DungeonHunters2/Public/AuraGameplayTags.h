@@ -34,11 +34,7 @@ public:
 	FGameplayTag Attributes_Secondary_MaxMana;
 
 
-	//伤害抗性
-	FGameplayTag Attributes_Resilience_Fire;
-	FGameplayTag Attributes_Resilience_Lightning;
-	FGameplayTag Attributes_Resilience_Arcane;
-	FGameplayTag Attributes_Resilience_Physical;
+
 
 
 	FGameplayTag Attributes_Meta_IncomingXp;
@@ -79,6 +75,24 @@ public:
 	FGameplayTag Damage_Arcane;
 	FGameplayTag Damage_Physical;
 
+
+	//伤害抗性
+	FGameplayTag Attributes_Resilience_Fire;
+	FGameplayTag Attributes_Resilience_Lightning;
+	FGameplayTag Attributes_Resilience_Arcane;
+	FGameplayTag Attributes_Resilience_Physical;
+
+	FGameplayTag Debuff_Burn;
+	FGameplayTag Debuff_Stun;
+	FGameplayTag Debuff_Arcane;
+	FGameplayTag Debuff_Physical;
+
+	FGameplayTag Debuff_Chance;
+	FGameplayTag Debuff_Damage;
+	FGameplayTag Debuff_Duration;
+	FGameplayTag Debuff_Frequency;
+
+
 	FGameplayTag Abilities_None;
 	FGameplayTag Abilities_Attack;
 	FGameplayTag Abilities_Summon;
@@ -110,6 +124,8 @@ public:
 
 	TMap<FGameplayTag, FGameplayTag> DamageTypesToResilience;
 	// TArray<FGameplayTag> DamageTypes;
+	TMap<FGameplayTag, FGameplayTag> DamageTypesToDebuffs;
+
 
 	FGameplayTag Effects_HitReact;
 	

@@ -11,9 +11,15 @@ DECLARE_MULTICAST_DELEGATE_OneParam(FEffectAssetTags, const FGameplayTagContaine
 DECLARE_MULTICAST_DELEGATE(FAbilitiesGiven);
 DECLARE_DELEGATE_OneParam(FForEachAbility, const FGameplayAbilitySpec&);
 DECLARE_MULTICAST_DELEGATE_ThreeParams(FAbilityStatusChanged,
-                                     const FGameplayTag&/*AbilityTag*/,
-                                     const FGameplayTag&/*AbilityStatusTag*/,
-                                     int32 /*技能等级*/);
+                                       const FGameplayTag&/*AbilityTag*/,
+                                       const FGameplayTag&/*AbilityStatusTag*/,
+                                       int32 /*技能等级*/);
+DECLARE_MULTICAST_DELEGATE_FourParams(FAbilityEquipped,
+                                      const FGameplayTag&/*AbilityTag*/,
+                                      const FGameplayTag&/*AbilityStatusTag*/,
+                                      const FGameplayTag&/*SlotTag*/,
+                                      const FGameplayTag&/*PreTag*/);
+
 
 /**
  * 
@@ -28,7 +34,8 @@ public:
 	FEffectAssetTags EffectAssetTags;
 	FAbilitiesGiven AbilitiesGivenDelegate;
 	FAbilityStatusChanged AbilityStatusChangedDelegate;
-
+	FAbilityEquipped AbilityEquippedDelegate;
+	
 	void AddCharacterAbilities(const TArray<TSubclassOf<UGameplayAbility>>& StartUpAbility);
 	void AddCharacterPassiveAbilities(const TArray<TSubclassOf<UGameplayAbility>>& StartUpAbility);
 
@@ -43,6 +50,9 @@ public:
 	static FGameplayTag GetAbilityTagFromSpec(const FGameplayAbilitySpec& AbilitySpec);
 	static FGameplayTag GetInputTagFromSpec(const FGameplayAbilitySpec& AbilitySpec);
 	static FGameplayTag GetStatusFromSpec(const FGameplayAbilitySpec& AbilitySpec);
+	FGameplayTag GetStatusFromAbilityTag(const FGameplayTag& AbilityTag);
+	FGameplayTag GetInputTagFromAbilityTag(const FGameplayTag& AbilityTag);
+
 
 	FGameplayAbilitySpec* GetSpecFromAbilityTag(const FGameplayTag& AbilityTag);
 
@@ -56,7 +66,18 @@ public:
 	UFUNCTION(Server, Reliable)
 	void ServerSpendSpellPoint(const FGameplayTag& AbilityTag);
 
-	bool GetDescriptionsByAbilityTag(const FGameplayTag& AbilityTag,FString& OutDescriptions,FString& OutNextLevelDescriptions);
+	UFUNCTION(Server, Reliable)
+	void ServerEquipAbility(const FGameplayTag& AbilityTag, const FGameplayTag& Slot);
+
+	void ClientEquipAbility(const FGameplayTag& AbilityTag, const FGameplayTag& Status, const FGameplayTag& Slot,
+	                        const FGameplayTag& PreviousSlot);
+
+	bool GetDescriptionsByAbilityTag(const FGameplayTag& AbilityTag, FString& OutDescriptions,
+	                                 FString& OutNextLevelDescriptions);
+
+	void ClearSlot(FGameplayAbilitySpec* Spec);
+	void ClearAbilitiesOfSlot(const FGameplayTag& Slot);
+	static bool AbilitiesHasSlot(FGameplayAbilitySpec* Spec, const FGameplayTag& Slot);
 
 protected:
 	virtual void OnRep_ActivateAbilities() override;;

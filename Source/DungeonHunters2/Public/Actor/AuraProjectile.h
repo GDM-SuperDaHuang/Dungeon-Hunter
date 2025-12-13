@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameplayEffectTypes.h"
+#include "AuraAbilityTypes.h"
 #include "../../../../../../Softstore/Epic Games/UE_5.4/Engine/Plugins/FX/Niagara/Source/Niagara/Classes/NiagaraSystem.h"
 #include "Components/SphereComponent.h"
 #include "GameFramework/Actor.h"
@@ -23,10 +23,16 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UProjectileMovementComponent> ProjectileMovement;
 
+	// UPROPERTY(BlueprintReadWrite,meta=(ExposeOnSpawn = true))
+	// FGameplayEffectSpecHandle DamageEffectHandle;
+
 	UPROPERTY(BlueprintReadWrite,meta=(ExposeOnSpawn = true))
-	FGameplayEffectSpecHandle DamageEffectHandle;
+	FDamageEffectParams DamageEffectParams;
+
+	
 protected:
 	virtual void BeginPlay() override;
+	void OnHit();
 	virtual void Destroyed() override;
 	UFUNCTION()
 	void OnSphereOverlap(UPrimitiveComponent*  OverlappedComponent,AActor* OtherActor,UPrimitiveComponent* OtherComp,int32 OtherBodyIndex,bool bFromSweep,const FHitResult& SweepResult);

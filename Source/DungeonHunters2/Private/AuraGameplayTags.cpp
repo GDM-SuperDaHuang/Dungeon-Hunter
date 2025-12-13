@@ -184,6 +184,40 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 		FName(TEXT("Damage.Resilience.Physical")),
 		FString("Damage ResiliencePhysical Physical Type"));
 
+	/** debfffus */
+	GameplayTags.Debuff_Burn = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName(TEXT("Debuff.Burn")),
+		FString("Damage Debuff Fire Type"));
+
+	GameplayTags.Debuff_Stun = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName(TEXT("Debuff.Stun")),
+		FString("Damage Debuff Stun"));
+
+	GameplayTags.Debuff_Arcane = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName(TEXT("Debuff.Arcane")),
+		FString("Damage Debuff Arcane"));
+
+	GameplayTags.Debuff_Physical = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName(TEXT("Debuff.Physical")),
+		FString("Damage Debuff Physical Type"));
+
+	
+	GameplayTags.Debuff_Chance = UGameplayTagsManager::Get().AddNativeGameplayTag(
+	FName(TEXT("Debuff.Chance")),
+	FString("Damage Debuff Chance Type"));
+
+	GameplayTags.Debuff_Damage = UGameplayTagsManager::Get().AddNativeGameplayTag(
+	FName(TEXT("Debuff.Damage")),
+	FString("Damage Debuff Damage Type"));
+
+	GameplayTags.Debuff_Duration = UGameplayTagsManager::Get().AddNativeGameplayTag(
+	FName(TEXT("Debuff.Duration")),
+	FString("Damage Debuff Duration Type"));
+
+	GameplayTags.Debuff_Frequency = UGameplayTagsManager::Get().AddNativeGameplayTag(
+	FName(TEXT("Debuff.Frequency")),
+	FString("Damage Debuff Frequency Type"));
+
 
 	/** mata */
 	GameplayTags.Attributes_Meta_IncomingXp = UGameplayTagsManager::Get().AddNativeGameplayTag(
@@ -195,11 +229,16 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 	 * 抗性伤害map
 	 */
 	GameplayTags.DamageTypesToResilience.Add(GameplayTags.Damage_Fire, GameplayTags.Attributes_Resilience_Fire);
-	GameplayTags.DamageTypesToResilience.Add(GameplayTags.Damage_Lightning,
-	                                         GameplayTags.Attributes_Resilience_Lightning);
+	GameplayTags.DamageTypesToResilience.Add(GameplayTags.Damage_Lightning,GameplayTags.Attributes_Resilience_Lightning);
 	GameplayTags.DamageTypesToResilience.Add(GameplayTags.Damage_Arcane, GameplayTags.Attributes_Resilience_Arcane);
 	GameplayTags.DamageTypesToResilience.Add(GameplayTags.Damage_Physical, GameplayTags.Attributes_Resilience_Physical);
 
+	GameplayTags.DamageTypesToDebuffs.Add(GameplayTags.Damage_Fire, GameplayTags.Debuff_Burn);
+	GameplayTags.DamageTypesToDebuffs.Add(GameplayTags.Damage_Lightning, GameplayTags.Debuff_Stun);
+	GameplayTags.DamageTypesToDebuffs.Add(GameplayTags.Damage_Arcane, GameplayTags.Debuff_Arcane);
+	GameplayTags.DamageTypesToDebuffs.Add(GameplayTags.Damage_Physical, GameplayTags.Debuff_Physical);
+
+	
 
 	/*技能 */
 	GameplayTags.Abilities_None = UGameplayTagsManager::Get().AddNativeGameplayTag(
