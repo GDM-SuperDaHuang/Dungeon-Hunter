@@ -188,7 +188,8 @@ void AAuraCharacter::InitAbilityActorInfo()
 	AureASC->AbilityActorInfoSet();
 	AbilitySystemComponent = AurePlayerState->GetAbilitySystemComponent();
 	AttributeSet = AurePlayerState->GetAttributeSet();
-
+	OnASCRegistered.Broadcast(AbilitySystemComponent);
+	
 	// 5. 初始化 HUD（仅本地玩家）
 	if (AAuraPlayerController* AuraPlayerController = Cast<AAuraPlayerController>(GetController()))
 	{

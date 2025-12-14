@@ -7,7 +7,10 @@ public class DungeonHunters2 : ModuleRules
 	public DungeonHunters2(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
-	
+		
+		//关闭优化
+		OptimizeCode = CodeOptimization.Never;
+		
 		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "GameplayAbilities", "Niagara" });
 
 		PrivateDependencyModuleNames.AddRange(new string[] { "GameplayTags","GameplayTasks", "NavigationSystem","Niagara","AIModule"});
