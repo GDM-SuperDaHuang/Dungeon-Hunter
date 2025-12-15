@@ -8,6 +8,7 @@
 #include "MovieSceneTracksComponentTypes.h"
 #include "NavigationPath.h"
 #include "NavigationSystem.h"
+#include "NiagaraFunctionLibrary.h"
 #include "AbilitySystem/AureAbilitySystemComponent.h"
 #include "Components/SplineComponent.h"
 #include "GameFramework/Character.h"
@@ -221,13 +222,17 @@ void AAuraPlayerController::CursorTrace()
 /* ---------- 6. 技能输入 – 与 GAS 联动 ---------- */
 void AAuraPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
 {
-	GEngine->AddOnScreenDebugMessage(1, 3, FColor::Yellow, *InputTag.ToString());
+	// GEngine->AddOnScreenDebugMessage(1, 3, FColor::Yellow, *InputTag.ToString());
 
 	// 仅左键需要特殊处理：判断是否指向敌人
 	if (InputTag.MatchesTagExact(FAuraGameplayTags::Get().InputTag_LMB))
 	{
 		bTargeting = ThisActor ? true : false;
 		bAutoRunning = false;
+	}
+	if (GetASC())
+	{
+		GetASC()->AbilityInputTagPressed(InputTag);
 	}
 }
 
@@ -275,6 +280,8 @@ void AAuraPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 					bAutoRunning = true;
 				}
 			}
+
+			UNiagaraFunctionLibrary::SpawnSystemAtLocation(this,ClickNiagaraSystem,CachedDestination);
 		}
 		FollowTime = 0.0f;
 		bTargeting = false;

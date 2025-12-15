@@ -245,6 +245,10 @@ public:
 	void OnRep_PhysicalResistance(const FGameplayAttributeData& OldValue) const;
 
 private:
+	void HandleIncomingDamage(const FEffectProperties& Props);
+	void HandleIncomingXP(const FEffectProperties& Props);
+	void Debuff(const FEffectProperties& Props);
+
 	// 设置效果属性 - 提取效果相关的上下文信息
 	void SetEffectProperties(const struct FGameplayEffectModCallbackData& Data, FEffectProperties& props) const;
 

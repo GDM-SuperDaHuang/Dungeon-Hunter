@@ -68,6 +68,23 @@ void UAureAbilitySystemComponent::AddCharacterPassiveAbilities(
 	}
 }
 
+void UAureAbilitySystemComponent::AbilityInputTagPressed(const FGameplayTag& InputTags)
+{
+	if (!InputTags.IsValid()) return;
+
+	for (FGameplayAbilitySpec AbilitySpec : GetActivatableAbilities())
+	{
+		if (AbilitySpec.DynamicAbilityTags.HasTag(InputTags))
+		{
+			AbilitySpecInputPressed(AbilitySpec);
+			if (AbilitySpec.IsActive())
+			{
+				InvokeReplicatedEvent(EAbilityGenericReplicatedEvent::InputPressed,AbilitySpec.Handle,AbilitySpec.ActivationInfo.GetActivationPredictionKey());
+			}
+		}
+	}
+}
+
 /**
  * 输入系统回调：某输入标签被“按住”时调用
  * 遍历所有已拥有的技能，找到 DynamicAbilityTags 匹配的标签 → 尝试激活
@@ -104,9 +121,10 @@ void UAureAbilitySystemComponent::AbilityInputTagReleased(const FGameplayTag& In
 
 	for (FGameplayAbilitySpec AbilitySpec : GetActivatableAbilities())
 	{
-		if (AbilitySpec.DynamicAbilityTags.HasTag(InputTags))
+		if (AbilitySpec.DynamicAbilityTags.HasTag(InputTags)&& AbilitySpec.IsActive())
 		{
 			AbilitySpecInputReleased(AbilitySpec);
+			InvokeReplicatedEvent(EAbilityGenericReplicatedEvent::InputReleased,AbilitySpec.Handle,AbilitySpec.ActivationInfo.GetActivationPredictionKey());
 		}
 	}
 }
@@ -190,7 +208,7 @@ FGameplayTag UAureAbilitySystemComponent::GetInputTagFromAbilityTag(const FGamep
 FGameplayAbilitySpec* UAureAbilitySystemComponent::GetSpecFromAbilityTag(const FGameplayTag& AbilityTag)
 {
 	FScopedAbilityListLock ActiveScopeLock(*this);
-	for (FGameplayAbilitySpec AbilitySpec : GetActivatableAbilities())
+	for (FGameplayAbilitySpec& AbilitySpec : GetActivatableAbilities())
 	{
 		for (FGameplayTag Tag : AbilitySpec.Ability.Get()->AbilityTags)
 		{

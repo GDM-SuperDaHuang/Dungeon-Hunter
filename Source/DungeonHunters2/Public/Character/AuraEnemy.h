@@ -3,7 +3,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "AbilitySystem/Data/CharacterClassInfo.h"
 #include "Character/AuraCharacterBase.h"
 #include "Components/WidgetComponent.h"
 #include "Interaction/EnenmyInterface.h"
@@ -35,7 +34,7 @@ public:
 
 	/**combat Interface*/
 	virtual int32 GetPlayerLevel_Implementation() override;
-	virtual void Die() override;
+	virtual void Die(const FVector& DeathImpulse) override;
 
 	virtual void SetCombatTarget_Implementation(AActor* InCombatTarget) override;
 	virtual AActor* GetCombatTarget_Implementation() const override;

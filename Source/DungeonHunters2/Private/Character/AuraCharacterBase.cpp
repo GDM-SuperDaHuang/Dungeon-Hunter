@@ -5,6 +5,7 @@
 #include "AbilitySystemComponent.h"
 #include "AuraGameplayTags.h"
 #include "AbilitySystem/AureAbilitySystemComponent.h"
+#include "AbilitySystem/Debuff/DebuffNiagaraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "DungeonHunters2/DungeonHunters2.h"
 #include "Kismet/GameplayStatics.h"
@@ -13,6 +14,9 @@ AAuraCharacterBase::AAuraCharacterBase()
 {
 	// 不让角色 Tick，性能优化（子类需要再开）
 	PrimaryActorTick.bCanEverTick = false;
+	BurnDebuffComponent = CreateDefaultSubobject<UDebuffNiagaraComponent>("BurnDebuffComponent");
+	BurnDebuffComponent->SetupAttachment(GetRootComponent());
+	BurnDebuffComponent->DebuffTag = FAuraGameplayTags::Get().Debuff_Burn;
 
 	// === 碰撞设置 ==========================================================
 	// 胶囊体对摄像机忽略，避免穿墙遮挡
@@ -44,27 +48,30 @@ UAnimMontage* AAuraCharacterBase::GetHitReactMontage_Implementation()
 	return HitReactMontage;
 }
 
-void AAuraCharacterBase::Die()
+void AAuraCharacterBase::Die(const FVector& DeathImpulse)
 {
 	Weapon->DetachFromComponent(FDetachmentTransformRules(EDetachmentRule::KeepWorld, true));
-	MulticastHandleDeath_Implementation();
+	MulticastHandleDeath(DeathImpulse);
 }
 
-void AAuraCharacterBase::MulticastHandleDeath_Implementation()
+void AAuraCharacterBase::MulticastHandleDeath_Implementation(const FVector& DeathImpulse)
 {
 	UGameplayStatics::PlaySoundAtLocation(this, DeathSound, GetActorLocation(), GetActorRotation());
 	Weapon->SetSimulatePhysics(true);
 	Weapon->SetEnableGravity(true);
 	Weapon->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
-
+	Weapon->AddImpulse(DeathImpulse,NAME_None,true);
+	
 	GetMesh()->SetSimulatePhysics(true);
 	GetMesh()->SetEnableGravity(true);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
 	GetMesh()->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Block);
-
+	GetMesh()->AddImpulse(DeathImpulse,NAME_None,true);
+	
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	Dissolve();
 	bDead = true;
+	OnDeath.Broadcast(this);
 }
 
 void AAuraCharacterBase::BeginPlay()
@@ -144,6 +151,16 @@ void AAuraCharacterBase::IncrementMinionCount_Implementation(int32 Amount)
 ECharacterClass AAuraCharacterBase::GetCharacterClass_Implementation()
 {
 	return CharacterClass;
+}
+
+FOnASCRegistered AAuraCharacterBase::GetOnASCRegisteredDelegate()
+{
+	return OnASCRegistered;
+}
+
+FOnDeath AAuraCharacterBase::GetOnDeathDelegate()
+{
+	return OnDeath;
 }
 
 
