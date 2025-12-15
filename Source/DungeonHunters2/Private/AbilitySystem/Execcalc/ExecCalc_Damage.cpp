@@ -92,9 +92,12 @@ const
 		const float TypeDamage = Spec.GetSetByCallerMagnitude(DamageType, false, -1.f);
 		if (TypeDamage > -.5f)
 		{
-			const float SourceDebuffChance = Spec.GetSetByCallerMagnitude(DamageType, false, -1.f);
+			// 有问题？
+			const float SourceDebuffChance = Spec.GetSetByCallerMagnitude(GameplayTags.Debuff_Chance, false, -1.f);
 			float TargetDebuffResistance = 0.f;
 			FGameplayTag ResistanceTag = GameplayTags.DamageTypesToResilience[DamageType];
+			// 从目标（被伤害者）身上捕获对应的抗性属性值
+            // InTagsToDefs 在 ExecutionCalculation 的 CaptureAttributes 中定义
 			ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(InTagsToDefs[ResistanceTag],
 			                                                           EvaluateParams, TargetDebuffResistance);
 			TargetDebuffResistance = FMath::Max<float>(TargetDebuffResistance, 0.f);
