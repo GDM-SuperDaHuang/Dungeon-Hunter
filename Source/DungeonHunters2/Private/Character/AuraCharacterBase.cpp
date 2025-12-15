@@ -16,7 +16,7 @@ AAuraCharacterBase::AAuraCharacterBase()
 	PrimaryActorTick.bCanEverTick = false;
 	BurnDebuffComponent = CreateDefaultSubobject<UDebuffNiagaraComponent>("BurnDebuffComponent");
 	BurnDebuffComponent->SetupAttachment(GetRootComponent());
-	BurnDebuffComponent->DebuffTag = FAuraGameplayTags::Get().Debuff_Burn;
+	BurnDebuffComponent->DebuffTag = FAuraGameplayTags::Get().Debuff_Burn;// ???
 
 	// === 碰撞设置 ==========================================================
 	// 胶囊体对摄像机忽略，避免穿墙遮挡

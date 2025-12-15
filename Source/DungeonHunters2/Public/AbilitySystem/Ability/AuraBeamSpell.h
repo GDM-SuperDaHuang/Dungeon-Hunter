@@ -1,0 +1,34 @@
+// daHuang
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "AbilitySystem/Ability/AuraDamageGameplayAbility.h"
+#include "AuraBeamSpell.generated.h"
+
+/**
+ * 
+ */
+UCLASS()
+class DUNGEONHUNTERS2_API UAuraBeamSpell : public UAuraDamageGameplayAbility
+{
+	GENERATED_BODY()
+public:
+
+	UFUNCTION(BlueprintCallable)
+	void StoreMouseDataInfo(const FHitResult& HitResult);
+
+	UFUNCTION(BlueprintCallable)
+	void StoreOwnerPlayerController();
+protected:
+
+	UPROPERTY(BlueprintReadWrite,Category="Beam")
+	FVector MouseHitLocation;
+
+	UPROPERTY(BlueprintReadWrite,Category="Beam")
+	TObjectPtr<AActor> MouseHitActor;
+
+	UPROPERTY(BlueprintReadWrite,Category="Beam")
+	TObjectPtr<APlayerController> OwnerPlayerController;
+
+};
