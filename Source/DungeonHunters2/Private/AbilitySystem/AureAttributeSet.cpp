@@ -335,7 +335,7 @@ void UAureAttributeSet::Debuff(const FEffectProperties& Props)
 	Effect->DurationPolicy = EGameplayEffectDurationType::HasDuration;
 	Effect->Period = DebuffFrequency;
 	Effect->DurationMagnitude = FScalableFloat(DebuffDuration);
-
+	FGameplayTag DamageTypesToDebuff = GameplayTags.DamageTypesToDebuffs[DamageType];
 	Effect->InheritableBlockedAbilityTagsContainer.AddTag(GameplayTags.DamageTypesToDebuffs[DamageType]);
 
 	Effect->StackingType = EGameplayEffectStackingType::AggregateBySource;
