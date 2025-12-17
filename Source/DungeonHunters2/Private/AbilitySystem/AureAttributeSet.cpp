@@ -337,6 +337,7 @@ void UAureAttributeSet::Debuff(const FEffectProperties& Props)
 	Effect->DurationMagnitude = FScalableFloat(DebuffDuration);
 
 	// 触发回调ASC的RegisterGameplayTagEvent回调DebuffTagChanged。
+	FGameplayTag DamageTypesToDebuff = GameplayTags.DamageTypesToDebuffs[DamageType];
 	Effect->InheritableOwnedTagsContainer.AddTag(GameplayTags.DamageTypesToDebuffs[DamageType]);
 
 	Effect->StackingType = EGameplayEffectStackingType::AggregateBySource;
@@ -356,7 +357,11 @@ void UAureAttributeSet::Debuff(const FEffectProperties& Props)
 		TSharedPtr<FGameplayTag> DebuffDamageType = MakeShareable(new FGameplayTag(DamageType));
 		AuraContext->SetDamageType(DebuffDamageType);
 
-		Props.TargetASC->ApplyGameplayEffectSpecToSelf(*MutableSpec);
+		FActiveGameplayEffectHandle ApplyGameplayEffectSpecToSelf = Props.TargetASC->ApplyGameplayEffectSpecToSelf(*MutableSpec);
+		if (ApplyGameplayEffectSpecToSelf.WasSuccessfullyApplied())
+		{
+			printf("");
+		}
 	}
 }
 
@@ -398,12 +403,12 @@ void UAureAttributeSet::PostAttributeChange(const FGameplayAttribute& Attribute,
 	Super::PostAttributeChange(Attribute, OldValue, NewValue);
 	if (Attribute == GetHealthAttribute() && bToOffHealth)
 	{
-		SetHealth(GetMaxHealth());
+		// SetHealth(GetMaxHealth());
 		bToOffHealth = false;
 	}
 	if (Attribute == GetManaAttribute() && bToOffMana)
 	{
-		SetMana(GetMaxMana());
+		// SetMana(GetMaxMana());
 		bToOffMana = false;
 	}
 }

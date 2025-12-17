@@ -94,14 +94,18 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 	GameplayTags.InputTag_Passive_2 = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName(TEXT("InputTag.Passive.2")),
 		FString("InputTag Passive 2"));
-
+		
 	/***
 	 * 蒙太奇事件通知标签
-	 */
+	 */		
 	GameplayTags.Event_Montage_FireBolt = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName(TEXT("Event.Montage.FireBolt")),
 		FString("FireBolt"));
 
+	GameplayTags.Event_Montage_Electrocute = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName(TEXT("Event.Montage.Electrocute")),
+		FString("Electrocute"));
+	
 	// GameplayTags.Event_Montage_Attack_Melee = UGameplayTagsManager::Get().AddNativeGameplayTag(
 	// 	FName(TEXT("Event.Montage.Attack.Melee")),
 	// 	FString("Attack Melee"));

@@ -441,9 +441,12 @@ FGameplayEffectContextHandle UAuraAbilitySystemLibrary::ApplyDamageEffect(const 
 	const FGameplayEffectSpecHandle SpecHandle = DamageEffectParams.SourceAbilitySystemComponent->MakeOutgoingSpec(
 		DamageEffectParams.DamageGameplayEffectClass, DamageEffectParams.AbilityLevel, EffectContextHandle);
 
-	
+	// 有问题？
 	UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, DamageEffectParams.DamageType,
 	                                                              DamageEffectParams.BaseDamage);
+
+	UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, GameplayTags.Debuff_Damage,
+																  DamageEffectParams.DebuffDamage);
 
 	UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, GameplayTags.Debuff_Chance,
 	                                                              DamageEffectParams.DebuffChance);
@@ -453,7 +456,15 @@ FGameplayEffectContextHandle UAuraAbilitySystemLibrary::ApplyDamageEffect(const 
 
 	UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, GameplayTags.Debuff_Frequency,
 															  DamageEffectParams.DebuffFrequency);
-	
+	//ProjectileTargetLocation.X = Identifier 'ProjectileTargetLocation' is not available, possibly due to compiler optimizations
+	// Registers
+	// DamageEffectParams = {const FDamageEffectParams &} {WorldContextObject={={ObjectPtr=0x000008629d1fdc00 (Name="BP_AuraCharacter_C"_0), DebugPtr=0x000008629d1fdc00 (Name="BP_AuraCharacter_C"_0)}}, DamageGameplayEffectClass={Class={={ObjectPtr=0x0000086271e60000 (Name="GE_Damage_C", InternalFlags=, ...}}}, ...}
+	// 	GameplayTags = {FAuraGameplayTags} {Attributes_Primary_Strength={TagName="Attributes.Primary.Strength"}, Attributes_Primary_Intelligence={TagName="Attributes.Primary.Intelligence"}, Attributes_Primary_Resilience={TagName="Attributes.Primary.Resilience"}, ...}
+	// SourceAvatarActor = {AAuraCharacter *} 0x000008629d1fdc00 (Name="BP_AuraCharacter_C"_0)
+	// EffectContextHandle = {FGameplayEffectContextHandle *} 0x0000006739f75510 {Data=SharedPtr=0x0000086295aeafe0 {bIsBlockedHit=true, bIsCriticalHit=false, bIsSuccessfulDebuff=true, ...}}
+	// SpecHandle = {FGameplayEffectSpecHandle} {Data=SharedPtr=0x0000086295be3600 {Def={={ObjectPtr=0x0000086271e51800 (Name="Default__GE_Damage_C", InternalFlags=ReachabilityFlag2), DebugPtr=0x0000086271e51800 (Name="Default__GE_Damage_C", InternalFlags=ReachabilityFlag2)}}, ModifiedAttributes=...}}
+	// $rdi = 0x0000006739f74e30 [443354140208]
+	// $rsp = 0x0000006739f74ba0 [443354139552]
 	DamageEffectParams.TargetAbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data);
 
 	return EffectContextHandle;

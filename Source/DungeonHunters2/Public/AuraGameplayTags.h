@@ -53,6 +53,8 @@ public:
 
 	//蒙太奇事件通知标签
 	FGameplayTag Event_Montage_FireBolt;
+	FGameplayTag Event_Montage_Electrocute;
+
 	// FGameplayTag Event_Montage_Attack_Melee;
 	// CombatSocket_Weapon
 	FGameplayTag CombatSocket_Weapon;
