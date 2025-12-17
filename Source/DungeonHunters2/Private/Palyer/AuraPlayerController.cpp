@@ -126,6 +126,10 @@ void AAuraPlayerController::AutoRun()
 
 void AAuraPlayerController::Move(const FInputActionValue& InputActionValue)
 {
+	if (GetASC()&&GetASC()->HasMatchingGameplayTag(FAuraGameplayTags::Get().Play_Block_InputPressed))
+	{
+		return;
+	}
 	// 增强输入默认返回 FVector2D
 	const FVector2D InputAxisVecter = InputActionValue.Get<FVector2D>();
 
@@ -148,6 +152,15 @@ void AAuraPlayerController::Move(const FInputActionValue& InputActionValue)
 /* ---------- 光标扫描 – 高亮敌人 ---------- */
 void AAuraPlayerController::CursorTrace()
 {
+	if (GetASC()&&GetASC()->HasMatchingGameplayTag(FAuraGameplayTags::Get().Play_Block_CursorTrace))
+	{
+		if (LastActor) LastActor->UnHighlightActor();
+		if (ThisActor) ThisActor->HighlightActor();
+		LastActor = nullptr;
+		ThisActor = nullptr;
+		return;
+	}
+	
 	// 只检测 Visibility 通道；false=不复杂轨迹
 	GetHitResultUnderCursor(ECC_Visibility, false, CursorHit);
 	if (!CursorHit.bBlockingHit) return;
@@ -224,6 +237,10 @@ void AAuraPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
 {
 	// GEngine->AddOnScreenDebugMessage(1, 3, FColor::Yellow, *InputTag.ToString());
 
+	if (GetASC()&&GetASC()->HasMatchingGameplayTag(FAuraGameplayTags::Get().Play_Block_InputPressed))
+	{
+		return;
+	}
 	// 仅左键需要特殊处理：判断是否指向敌人
 	if (InputTag.MatchesTagExact(FAuraGameplayTags::Get().InputTag_LMB))
 	{
@@ -239,6 +256,10 @@ void AAuraPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
 // 松开：区分“短按 / 长按 / 强制施法”三种路线
 void AAuraPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 {
+	if (GetASC()&&GetASC()->HasMatchingGameplayTag(FAuraGameplayTags::Get().Play_Block_InputReleased))
+	{
+		return;
+	}
 	// 非左键技能：直接走 ASC 的标准输入释放
 	if (!InputTag.MatchesTagExact(FAuraGameplayTags::Get().InputTag_LMB))
 	{
@@ -281,6 +302,12 @@ void AAuraPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 				}
 			}
 
+
+			// if (GetASC()&&!GetASC()->HasMatchingGameplayTag(FAuraGameplayTags::Get().Play_Block_InputPressed))
+			// {
+			// 	return;
+			// }
+
 			UNiagaraFunctionLibrary::SpawnSystemAtLocation(this,ClickNiagaraSystem,CachedDestination);
 		}
 		FollowTime = 0.0f;
@@ -292,6 +319,11 @@ void AAuraPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 // 按住：每帧触发；技能需要“蓄力”或“连续发射”时在这里处理
 void AAuraPlayerController::AbilityInputTagHeld(FGameplayTag InputTag)
 {
+
+	if (GetASC()&&GetASC()->HasMatchingGameplayTag(FAuraGameplayTags::Get().Play_Block_InputHeld))
+	{
+		return;
+	}
 	// 非左键：直接转发
 	if (!InputTag.MatchesTagExact(FAuraGameplayTags::Get().InputTag_LMB))
 	{

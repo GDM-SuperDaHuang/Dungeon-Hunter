@@ -133,6 +133,15 @@ public:
 	
 	//GameplayCue
 	FGameplayTag GameplayCue_MeleeImpact;
+
+
+	// 输入通知
+	FGameplayTag Play_Block_InputPressed;
+	FGameplayTag Play_Block_InputHeld;
+	FGameplayTag Play_Block_InputReleased;
+	FGameplayTag Play_Block_CursorTrace;
+
+
 	
 
 protected:

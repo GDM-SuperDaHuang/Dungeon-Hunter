@@ -149,6 +149,25 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 		FString("Montage Attack 4"));
 
 
+	// 输入
+	GameplayTags.Play_Block_InputPressed = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName(TEXT("Play.Block.InputPressed")),
+		FString("Play Block InputPressed"));
+	
+	GameplayTags.Play_Block_InputHeld = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName(TEXT("Play.Block.InputHeld")),
+		FString("Play Block InputHeld"));
+
+	GameplayTags.Play_Block_InputReleased = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName(TEXT("Play.Block.InputReleased")),
+		FString("Play Block InputReleased"));
+
+	GameplayTags.Play_Block_CursorTrace = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName(TEXT("Play.Block.CursorTrace")),
+		FString("Play Block CursorTrace"));
+
+
+
 	// 伤害类型
 	GameplayTags.Damage = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName(TEXT("Damage")),
