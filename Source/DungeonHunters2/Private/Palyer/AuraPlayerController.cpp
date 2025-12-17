@@ -126,7 +126,7 @@ void AAuraPlayerController::AutoRun()
 
 void AAuraPlayerController::Move(const FInputActionValue& InputActionValue)
 {
-	if (GetASC()&&GetASC()->HasMatchingGameplayTag(FAuraGameplayTags::Get().Play_Block_InputPressed))
+	if (GetASC() && GetASC()->HasMatchingGameplayTag(FAuraGameplayTags::Get().Play_Block_InputPressed))
 	{
 		return;
 	}
@@ -152,7 +152,7 @@ void AAuraPlayerController::Move(const FInputActionValue& InputActionValue)
 /* ---------- 光标扫描 – 高亮敌人 ---------- */
 void AAuraPlayerController::CursorTrace()
 {
-	if (GetASC()&&GetASC()->HasMatchingGameplayTag(FAuraGameplayTags::Get().Play_Block_CursorTrace))
+	if (GetASC() && GetASC()->HasMatchingGameplayTag(FAuraGameplayTags::Get().Play_Block_CursorTrace))
 	{
 		if (LastActor) LastActor->UnHighlightActor();
 		if (ThisActor) ThisActor->HighlightActor();
@@ -160,7 +160,7 @@ void AAuraPlayerController::CursorTrace()
 		ThisActor = nullptr;
 		return;
 	}
-	
+
 	// 只检测 Visibility 通道；false=不复杂轨迹
 	GetHitResultUnderCursor(ECC_Visibility, false, CursorHit);
 	if (!CursorHit.bBlockingHit) return;
@@ -237,7 +237,7 @@ void AAuraPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
 {
 	// GEngine->AddOnScreenDebugMessage(1, 3, FColor::Yellow, *InputTag.ToString());
 
-	if (GetASC()&&GetASC()->HasMatchingGameplayTag(FAuraGameplayTags::Get().Play_Block_InputPressed))
+	if (GetASC() && GetASC()->HasMatchingGameplayTag(FAuraGameplayTags::Get().Play_Block_InputPressed))
 	{
 		return;
 	}
@@ -256,7 +256,7 @@ void AAuraPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
 // 松开：区分“短按 / 长按 / 强制施法”三种路线
 void AAuraPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 {
-	if (GetASC()&&GetASC()->HasMatchingGameplayTag(FAuraGameplayTags::Get().Play_Block_InputReleased))
+	if (GetASC() && GetASC()->HasMatchingGameplayTag(FAuraGameplayTags::Get().Play_Block_InputReleased))
 	{
 		return;
 	}
@@ -301,14 +301,11 @@ void AAuraPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 					bAutoRunning = true;
 				}
 			}
-
-
-			// if (GetASC()&&!GetASC()->HasMatchingGameplayTag(FAuraGameplayTags::Get().Play_Block_InputPressed))
-			// {
-			// 	return;
-			// }
-
-			UNiagaraFunctionLibrary::SpawnSystemAtLocation(this,ClickNiagaraSystem,CachedDestination);
+			
+			if (GetASC() && !GetASC()->HasMatchingGameplayTag(FAuraGameplayTags::Get().Play_Block_InputPressed))
+			{
+				UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ClickNiagaraSystem, CachedDestination);
+			}
 		}
 		FollowTime = 0.0f;
 		bTargeting = false;
@@ -319,8 +316,7 @@ void AAuraPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 // 按住：每帧触发；技能需要“蓄力”或“连续发射”时在这里处理
 void AAuraPlayerController::AbilityInputTagHeld(FGameplayTag InputTag)
 {
-
-	if (GetASC()&&GetASC()->HasMatchingGameplayTag(FAuraGameplayTags::Get().Play_Block_InputHeld))
+	if (GetASC() && GetASC()->HasMatchingGameplayTag(FAuraGameplayTags::Get().Play_Block_InputHeld))
 	{
 		return;
 	}
@@ -340,7 +336,7 @@ void AAuraPlayerController::AbilityInputTagHeld(FGameplayTag InputTag)
 	{
 		if (GetASC())
 		{
-			GetASC()->AbilityInputTagHeld(InputTag);//????
+			GetASC()->AbilityInputTagHeld(InputTag); //????
 		}
 	}
 	else
