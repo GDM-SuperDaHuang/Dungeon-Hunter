@@ -35,6 +35,9 @@ FString UAuraFireBolt::GetNextLevelDescription(int32 Level)
 	}
 }
 
+/**
+ * 发射，无实时追踪目标，只开头确定目标位置后发射。
+ */
 void UAuraFireBolt::SpawnProjectiles(
 	const FVector& ProjectileTargetLocation,
 	const FGameplayTag& SocketTag,
@@ -64,12 +67,13 @@ void UAuraFireBolt::SpawnProjectiles(
 		FTransform SpawnTransform;
 		SpawnTransform.SetLocation(SocketLocation);
 		SpawnTransform.SetRotation(Rotation.Quaternion());
+		// 生成一个Actor ,并且延迟初始化，不进行其他操作	
 		AAuraProjectile* Projectile = GetWorld()->SpawnActorDeferred<AAuraProjectile>(
 				ProjectileClass,
-				SpawnTransform,
-				GetOwningActorFromActorInfo(),
-				Cast<APawn>(GetOwningActorFromActorInfo()),
-				ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
+				SpawnTransform,// 初始 Transform
+				GetOwningActorFromActorInfo(),// Owner（通常是施法角色）
+				Cast<APawn>(GetOwningActorFromActorInfo()),// Instigator（负责计入伤害统计）
+				ESpawnActorCollisionHandlingMethod::AlwaysSpawn);// 碰撞策略：强行生成，不管是否卡墙
 		Projectile->DamageEffectParams = MakeDamageEffectParamsFromClassDefaults();
 
 		if (HomingTarget && HomingTarget->Implements<UCombatInterface>())
@@ -77,17 +81,27 @@ void UAuraFireBolt::SpawnProjectiles(
 			Projectile->ProjectileMovement->HomingTargetComponent = HomingTarget->GetRootComponent();
 		}
 		else
-		{//注意指针
+		{	
+			//注意指针！！！
+			//这里的Projectile->ProjectileMovement->HomingTargetComponent是弱引用，如果目标的被销毁，那么该位置消失,Projectile->ProjectileMovement->HomingTargetComponent指向null
 			// Projectile->ProjectileMovement->HomingTargetComponent = NewObject<USceneComponent>(USceneComponent::StaticClass());
 		
+			//创建一个锚点，先缓存起来
 			Projectile->HomingTargetSceneComponent = NewObject<USceneComponent>(USceneComponent::StaticClass());
 			Projectile->HomingTargetSceneComponent->SetWorldLocation(ProjectileTargetLocation);
+			//设置目标地点
 			Projectile->ProjectileMovement->HomingTargetComponent  =Projectile->HomingTargetSceneComponent;
 		}
 		Projectile->ProjectileMovement->HomingAccelerationMagnitude = FMath::FRandRange(HomingAccelerationMin, HomingAccelerationMax);
 		Projectile->ProjectileMovement->bIsHomingProjectile = bLaunchHomingProjectiles;
 
-		// SpawnActorDeferred需要FinishSpawning， 完成投射物生成（应用之前的设置，触发AAuraProjectile的BeginPlay）
+		// 让导弹真正“启动” ，SpawnActorDeferred需要FinishSpawning， 完成投射物生成（应用之前的设置，触发AAuraProjectile的BeginPlay）
+		/**
+		 * FinishSpawning 会触发：
+		 * AActor::PostActorCreated()
+		 * UActorComponent::Activate()（含 ProjectileMovement）
+		 * AActor::BeginPlay()
+		 */
 		Projectile->FinishSpawning(SpawnTransform);
 	
 	}

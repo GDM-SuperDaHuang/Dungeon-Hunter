@@ -336,7 +336,8 @@ void UAureAttributeSet::Debuff(const FEffectProperties& Props)
 	Effect->Period = DebuffFrequency;
 	Effect->DurationMagnitude = FScalableFloat(DebuffDuration);
 
-	Effect->InheritableBlockedAbilityTagsContainer.AddTag(GameplayTags.DamageTypesToDebuffs[DamageType]);
+	// 触发回调ASC的RegisterGameplayTagEvent回调DebuffTagChanged。
+	Effect->InheritableOwnedTagsContainer.AddTag(GameplayTags.DamageTypesToDebuffs[DamageType]);
 
 	Effect->StackingType = EGameplayEffectStackingType::AggregateBySource;
 	Effect->StackLimitCount = 1;
