@@ -110,6 +110,9 @@ public:
 		return NewContext;
 	}
 
+	/**
+	 * 需要通过网络复制（服务器→客户端）时，请按我规定的格式打包/解包，否则默认序列化会漏掉我扩展的成员变量
+	 */
 	virtual bool NetSerialize(FArchive& Ar, class UPackageMap* Map, bool& bOutSuccess) override;
 
 protected:
@@ -145,7 +148,7 @@ protected:
 	UPROPERTY()
 	FVector KnockbackForce =  FVector::ZeroVector;
 };
-
+//注册到引擎
 template <>
 struct TStructOpsTypeTraits<FAuraGameplayEffectContext> : public TStructOpsTypeTraitsBase2<FAuraGameplayEffectContext>
 {
