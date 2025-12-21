@@ -4,11 +4,13 @@
 #include "Character/AuraCharacter.h"
 
 #include "AbilitySystemComponent.h"
+#include "AuraGameplayTags.h"
 #include "NiagaraComponent.h"
 #include "AbilitySystem/AureAbilitySystemComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Palyer/AuraPlayerController.h"
 #include "AbilitySystem/Data/LevelUpInfo.h"
+#include "AbilitySystem/Debuff/DebuffNiagaraComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Palyer/AurePlayerState.h"
@@ -154,6 +156,24 @@ int32 AAuraCharacter::GetSpellPoints_Implementation() const
 	return AurePlayerState->GetSpellPoints();
 }
 
+void AAuraCharacter::ShowMagicCircle_Implementation(UMaterialInterface* DecalMaterial)
+{
+	if (AAuraPlayerController* AuraPlayerController = Cast<AAuraPlayerController>(GetController()))
+	{
+		AuraPlayerController->ShowMagicCircle(DecalMaterial);
+		AuraPlayerController->bShowMouseCursor = false;
+	}
+}
+
+void AAuraCharacter::HideMagicCircle_Implementation()
+{
+	if (AAuraPlayerController* AuraPlayerController = Cast<AAuraPlayerController>(GetController()))
+	{
+		AuraPlayerController->HideMagicCircle();
+		AuraPlayerController->bShowMouseCursor = true;
+	}
+}
+
 /* ========== 等级接口 ========== */
 int32 AAuraCharacter::GetPlayerLevel_Implementation()
 {
@@ -161,6 +181,41 @@ int32 AAuraCharacter::GetPlayerLevel_Implementation()
 	AAurePlayerState* AurePlayerState = GetPlayerState<AAurePlayerState>();
 	check(AurePlayerState);
 	return AurePlayerState->GetPlayerLevel();
+}
+
+void AAuraCharacter::OnRep_Stunned()
+{
+	if (UAureAbilitySystemComponent* AuraASC = Cast<UAureAbilitySystemComponent>(AbilitySystemComponent))
+	{
+		const FAuraGameplayTags& GameplayTags = FAuraGameplayTags::Get();
+		FGameplayTagContainer BlockedTags;
+		BlockedTags.AddTag(GameplayTags.Play_Block_InputPressed);
+		BlockedTags.AddTag(GameplayTags.Play_Block_InputHeld);
+		BlockedTags.AddTag(GameplayTags.Play_Block_InputReleased);
+		BlockedTags.AddTag(GameplayTags.Play_Block_CursorTrace);
+		if (bIsStunned)
+		{
+			AuraASC->AddLooseGameplayTags(BlockedTags);
+			StunDebuffComponent->Activate();
+		}
+		else
+		{
+			AuraASC->RemoveLooseGameplayTags(BlockedTags);
+			StunDebuffComponent->Deactivate();
+		}
+	}
+}
+
+void AAuraCharacter::OnRep_Burned()
+{
+	if (bIsBurned)
+	{
+		BurnDebuffComponent->Activate();
+	}
+	else
+	{
+		BurnDebuffComponent->Deactivate();
+	}
 }
 
 /* ========== ASC 初始化 ========== */
@@ -189,7 +244,8 @@ void AAuraCharacter::InitAbilityActorInfo()
 	AbilitySystemComponent = AurePlayerState->GetAbilitySystemComponent();
 	AttributeSet = AurePlayerState->GetAttributeSet();
 	OnASCRegistered.Broadcast(AbilitySystemComponent);
-	
+	AbilitySystemComponent->RegisterGameplayTagEvent(FAuraGameplayTags::Get().Debuff_Stun, EGameplayTagEventType::NewOrRemoved).AddUObject(this, &AAuraCharacter::StunTagChanged);
+
 	// 5. 初始化 HUD（仅本地玩家）
 	if (AAuraPlayerController* AuraPlayerController = Cast<AAuraPlayerController>(GetController()))
 	{

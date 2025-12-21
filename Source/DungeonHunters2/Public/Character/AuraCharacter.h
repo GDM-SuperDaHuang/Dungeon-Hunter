@@ -38,7 +38,10 @@ public:
 	virtual void AddToSpellPoints_Implementation(int32 InSpellPoints) override;
 	virtual int32 GetAttributePoints_Implementation() const;
 	virtual int32 GetSpellPoints_Implementation() const;
+	virtual void ShowMagicCircle_Implementation(UMaterialInterface* DecalMaterial) override;
+	virtual void HideMagicCircle_Implementation() override;
 
+	
 	/** IPlayerInterface */
 
 	/**combat Interface*/
@@ -47,6 +50,8 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UNiagaraComponent> LevelNiagaraComponent;
 
+	virtual void OnRep_Stunned() override;
+	virtual void OnRep_Burned() override;
 private:
 
 	UPROPERTY(VisibleAnywhere)

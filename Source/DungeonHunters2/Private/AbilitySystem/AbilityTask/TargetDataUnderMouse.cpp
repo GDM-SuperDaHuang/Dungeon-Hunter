@@ -3,6 +3,7 @@
 
 #include "AbilitySystem/AbilityTask/TargetDataUnderMouse.h"
 #include "AbilitySystemComponent.h"
+#include "DungeonHunters2/DungeonHunters2.h"
 
 /**
  * 工厂函数，蓝图节点“TargetDataUnderMouse”的入口
@@ -74,7 +75,7 @@ void UTargetDataUnderMouse::SendMouseCursorData()
 	 */
 	FHitResult CursorHit;
 	// 3. 获取鼠标光标下的命中结果
-	PC->GetHitResultUnderCursor(ECC_Visibility, true, CursorHit);
+	PC->GetHitResultUnderCursor(ECC_Target, true, CursorHit);
 
 	
 	// 4. 构造 GAS 所需的 TargetData 结构

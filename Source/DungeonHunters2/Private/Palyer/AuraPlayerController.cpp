@@ -10,6 +10,8 @@
 #include "NavigationSystem.h"
 #include "NiagaraFunctionLibrary.h"
 #include "AbilitySystem/AureAbilitySystemComponent.h"
+#include "Actor/MagicCircle.h"
+#include "Components/DecalComponent.h"
 #include "Components/SplineComponent.h"
 #include "GameFramework/Character.h"
 #include "Input/AuraInputComponent.h"
@@ -23,6 +25,26 @@ AAuraPlayerController::AAuraPlayerController()
 	bReplicates = true;
 	// 创建样条组件，用来记录导航路径点，供 AutoRun 使用
 	Spline = CreateDefaultSubobject<USplineComponent>("Spline");
+}
+
+void AAuraPlayerController::ShowMagicCircle(UMaterialInterface* DecalMaterial)
+{
+	if (!IsValid(MagicCircle))
+	{
+		MagicCircle = GetWorld()->SpawnActor<AMagicCircle>(MagicCircleClass);
+		if (DecalMaterial)
+		{
+			MagicCircle->MagicCircleDecal->SetMaterial(0, DecalMaterial);
+		}
+	}
+}
+
+void AAuraPlayerController::HideMagicCircle()
+{
+	if (IsValid(MagicCircle))
+	{
+		MagicCircle->Destroy();
+	}
 }
 
 void AAuraPlayerController::ShowDamageNumber_Implementation(float DamageAmount, ACharacter* TargetCharacter,
@@ -99,6 +121,7 @@ void AAuraPlayerController::PlayerTick(float DeltaTime)
 	Super::PlayerTick(DeltaTime);
 	CursorTrace();
 	AutoRun();
+	UpdateMagicCircleLocation();
 }
 
 // 每帧 Tick 里执行：沿样条移动，直到到达终点
@@ -120,6 +143,14 @@ void AAuraPlayerController::AutoRun()
 		{
 			bAutoRunning = false;
 		}
+	}
+}
+
+void AAuraPlayerController::UpdateMagicCircleLocation()
+{
+	if (IsValid(MagicCircle))
+	{
+		MagicCircle->SetActorLocation(CursorHit.ImpactPoint);
 	}
 }
 
@@ -310,7 +341,7 @@ void AAuraPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 		FollowTime = 0.0f;
 		bTargeting = false;
 	}
-	GEngine->AddOnScreenDebugMessage(2, 3, FColor::Red, *InputTag.ToString());
+	// GEngine->AddOnScreenDebugMessage(2, 3, FColor::Red, *InputTag.ToString());
 }
 
 // 按住：每帧触发；技能需要“蓄力”或“连续发射”时在这里处理
@@ -355,7 +386,7 @@ void AAuraPlayerController::AbilityInputTagHeld(FGameplayTag InputTag)
 		}
 	}
 
-	GEngine->AddOnScreenDebugMessage(3, 3, FColor::Green, *InputTag.ToString());
+	// GEngine->AddOnScreenDebugMessage(3, 3, FColor::Green, *InputTag.ToString());
 }
 
 // 懒加载获取 ASC：第一次调用时缓存，失败返回空
