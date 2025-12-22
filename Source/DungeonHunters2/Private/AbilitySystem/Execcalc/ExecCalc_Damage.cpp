@@ -9,6 +9,7 @@
 #include "AbilitySystem/AuraAbilitySystemLibrary.h"
 #include "AbilitySystem/AureAttributeSet.h"
 #include "Interaction/CombatInterface.h"
+#include "Kismet/GameplayStatics.h"
 
 struct AuraDamageStatics
 {
@@ -97,7 +98,7 @@ const
 			float TargetDebuffResistance = 0.f;
 			FGameplayTag ResistanceTag = GameplayTags.DamageTypesToResilience[DamageType];
 			// 从目标（被伤害者）身上捕获对应的抗性属性值
-            // InTagsToDefs 在 ExecutionCalculation 的 CaptureAttributes 中定义
+			// InTagsToDefs 在 ExecutionCalculation 的 CaptureAttributes 中定义
 			ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(InTagsToDefs[ResistanceTag],
 			                                                           EvaluateParams, TargetDebuffResistance);
 			TargetDebuffResistance = FMath::Max<float>(TargetDebuffResistance, 0.f);
@@ -164,6 +165,9 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 
 
 	FGameplayEffectSpec Spec = ExecutionParams.GetOwningSpec();
+	FGameplayEffectContextHandle EffectContextHandle = Spec.GetContext();
+	
+
 	const FGameplayTagContainer* SourceTags = Spec.CapturedSourceTags.GetAggregatedTags();
 	const FGameplayTagContainer* TargetTags = Spec.CapturedTargetTags.GetAggregatedTags();
 	FAggregatorEvaluateParameters EvaluateParams;
@@ -171,7 +175,7 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 	EvaluateParams.TargetTags = TargetTags;
 
 	//debuff
-	DetermineDebuff(ExecutionParams, Spec, EvaluateParams,TagsToCaptureDefs);
+	DetermineDebuff(ExecutionParams, Spec, EvaluateParams, TagsToCaptureDefs);
 
 
 	//伤害
@@ -182,17 +186,50 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 		const FGameplayTag ResistanceTag = Pair.Value;
 		checkf(TagsToCaptureDefs.Contains(ResistanceTag),
 		       TEXT("not contains tag: [%s] in TagsToCaptureDefs"), *ResistanceTag.ToString());
-		const FGameplayEffectAttributeCaptureDefinition CaptureDef = TagsToCaptureDefs[
-			ResistanceTag];
+		const FGameplayEffectAttributeCaptureDefinition CaptureDef = TagsToCaptureDefs[ResistanceTag];
 
 		float DamageTypeValue = Spec.GetSetByCallerMagnitude(Pair.Key, false);
-
+		if (DamageTypeValue <= 0.f)
+		{
+			continue;
+		}
+		
 		float Resistance = 0.f;
 		ExecutionParams.AttemptCalculateCapturedAttributeBonusMagnitude(CaptureDef, EvaluateParams, Resistance);
 		Resistance = FMath::Clamp(Resistance, 0.f, 100.f);
-
 		DamageTypeValue *= (100.f * Resistance) / 100.f;
+		
+		if (UAuraAbilitySystemLibrary::IsRadialDamage(EffectContextHandle))
+		{
+			// 1. override TakeDamage in AuraCharacterBase. *
+			// 2. create delegate OnDamageDelegate, broadcast damage received in TakeDamage *
+			// 3. Bind lambda to OnDamageDelegate on the Victim here. *
+			// 4. Call UGameplayStatics::ApplyRadialDamageWithFalloff to cause damage (this will result in TakeDamage being called
+			//		on the Victim, which will then broadcast OnDamageDelegate)
+			// 5. In Lambda, set DamageTypeValue to the damage received from the broadcast *
 
+			if (ICombatInterface* CombatInterface = Cast<ICombatInterface>(TargetAvatar))
+			{
+				CombatInterface->GetOnDamageSignature().AddLambda([&](float DamageAmount)
+				{
+					DamageTypeValue = DamageAmount;
+				});
+			}
+			UGameplayStatics::ApplyRadialDamageWithFalloff(
+				TargetAvatar,
+				DamageTypeValue,
+				0.f,
+				UAuraAbilitySystemLibrary::GetRadialDamageOrigin(EffectContextHandle),
+				UAuraAbilitySystemLibrary::GetRadialDamageInnerRadius(EffectContextHandle),
+				UAuraAbilitySystemLibrary::GetRadialDamageOuterRadius(EffectContextHandle),
+				1.f,
+				UDamageType::StaticClass(),
+				TArray<AActor*>(),
+				SourceAvatar,
+				nullptr);
+		}
+
+		
 		Damage += DamageTypeValue;
 	}
 
@@ -207,7 +244,6 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 	{
 		Damage /= 2;
 	}
-	FGameplayEffectContextHandle EffectContextHandle = Spec.GetContext();
 	UAuraAbilitySystemLibrary::SetBlockedHit(EffectContextHandle, bBlocked);
 
 	// FGameplayEffectContext* Context = EffectContextHandle.Get();

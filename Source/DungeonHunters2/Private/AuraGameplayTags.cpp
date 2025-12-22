@@ -106,6 +106,10 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 		FName(TEXT("Event.Montage.Electrocute")),
 		FString("Electrocute"));
 
+	GameplayTags.Event_Montage_ArcaneShards = UGameplayTagsManager::Get().AddNativeGameplayTag(
+			FName(TEXT("Event.Montage.ArcaneShards")),
+			FString("ArcaneShards"));
+	
 	// GameplayTags.Event_Montage_Attack_Melee = UGameplayTagsManager::Get().AddNativeGameplayTag(
 	// 	FName(TEXT("Event.Montage.Attack.Melee")),
 	// 	FString("Attack Melee"));
@@ -369,4 +373,8 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 	GameplayTags.GameplayCue_ShockLoop = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName(TEXT("GameplayCue.ShockLoop")),
 		FString("GameplayCue ShockLoop"));
+
+	GameplayTags.GameplayCue_ArcaneShards = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName(TEXT("GameplayCue.ArcaneShards")),
+		FString("GameplayCue ArcaneShards"));
 }
