@@ -94,10 +94,10 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 	GameplayTags.InputTag_Passive_2 = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName(TEXT("InputTag.Passive.2")),
 		FString("InputTag Passive 2"));
-		
+
 	/***
 	 * 蒙太奇事件通知标签
-	 */		
+	 */
 	GameplayTags.Event_Montage_FireBolt = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName(TEXT("Event.Montage.FireBolt")),
 		FString("FireBolt"));
@@ -105,7 +105,7 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 	GameplayTags.Event_Montage_Electrocute = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName(TEXT("Event.Montage.Electrocute")),
 		FString("Electrocute"));
-	
+
 	// GameplayTags.Event_Montage_Attack_Melee = UGameplayTagsManager::Get().AddNativeGameplayTag(
 	// 	FName(TEXT("Event.Montage.Attack.Melee")),
 	// 	FString("Attack Melee"));
@@ -153,7 +153,7 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 	GameplayTags.Play_Block_InputPressed = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName(TEXT("Play.Block.InputPressed")),
 		FString("Play Block InputPressed"));
-	
+
 	GameplayTags.Play_Block_InputHeld = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName(TEXT("Play.Block.InputHeld")),
 		FString("Play Block InputHeld"));
@@ -165,7 +165,6 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 	GameplayTags.Play_Block_CursorTrace = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName(TEXT("Play.Block.CursorTrace")),
 		FString("Play Block CursorTrace"));
-
 
 
 	// 伤害类型
@@ -224,22 +223,22 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 		FName(TEXT("Debuff.Physical")),
 		FString("Damage Debuff Physical Type"));
 
-	
+
 	GameplayTags.Debuff_Chance = UGameplayTagsManager::Get().AddNativeGameplayTag(
-	FName(TEXT("Debuff.Chance")),
-	FString("Damage Debuff Chance Type"));
+		FName(TEXT("Debuff.Chance")),
+		FString("Damage Debuff Chance Type"));
 
 	GameplayTags.Debuff_Damage = UGameplayTagsManager::Get().AddNativeGameplayTag(
-	FName(TEXT("Debuff.Damage")),
-	FString("Damage Debuff Damage Type"));
+		FName(TEXT("Debuff.Damage")),
+		FString("Damage Debuff Damage Type"));
 
 	GameplayTags.Debuff_Duration = UGameplayTagsManager::Get().AddNativeGameplayTag(
-	FName(TEXT("Debuff.Duration")),
-	FString("Damage Debuff Duration Type"));
+		FName(TEXT("Debuff.Duration")),
+		FString("Damage Debuff Duration Type"));
 
 	GameplayTags.Debuff_Frequency = UGameplayTagsManager::Get().AddNativeGameplayTag(
-	FName(TEXT("Debuff.Frequency")),
-	FString("Damage Debuff Frequency Type"));
+		FName(TEXT("Debuff.Frequency")),
+		FString("Damage Debuff Frequency Type"));
 
 
 	/** mata */
@@ -252,7 +251,8 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 	 * 抗性伤害map
 	 */
 	GameplayTags.DamageTypesToResilience.Add(GameplayTags.Damage_Fire, GameplayTags.Attributes_Resilience_Fire);
-	GameplayTags.DamageTypesToResilience.Add(GameplayTags.Damage_Lightning,GameplayTags.Attributes_Resilience_Lightning);
+	GameplayTags.DamageTypesToResilience.Add(GameplayTags.Damage_Lightning,
+	                                         GameplayTags.Attributes_Resilience_Lightning);
 	GameplayTags.DamageTypesToResilience.Add(GameplayTags.Damage_Arcane, GameplayTags.Attributes_Resilience_Arcane);
 	GameplayTags.DamageTypesToResilience.Add(GameplayTags.Damage_Physical, GameplayTags.Attributes_Resilience_Physical);
 
@@ -261,7 +261,6 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 	GameplayTags.DamageTypesToDebuffs.Add(GameplayTags.Damage_Arcane, GameplayTags.Debuff_Arcane);
 	GameplayTags.DamageTypesToDebuffs.Add(GameplayTags.Damage_Physical, GameplayTags.Debuff_Physical);
 
-	
 
 	/*技能 */
 	GameplayTags.Abilities_None = UGameplayTagsManager::Get().AddNativeGameplayTag(
@@ -285,9 +284,30 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 		FName(TEXT("Abilities.Lightning.Electrocute")),
 		FString("Abilities Lightning Electrocute"));
 
+	GameplayTags.Abilities_Arcane_ArcaneShards = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName(TEXT("Abilities.Arcane.ArcaneShards")),
+		FString("Abilities Arcane ArcaneShards"));
+
+	GameplayTags.Abilities_Fire_FireBlast = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName(TEXT("Abilities.Fire.FireBlast")),
+		FString("Abilities Fire FireBlast"));
+
 	GameplayTags.Abilities_HitReact = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName(TEXT("Abilities.HitReact")),
 		FString("Abilities HitReact"));
+
+	/** 被动技能 */
+	GameplayTags.Abilities_Passive_HaloOfProtection = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName(TEXT("Abilities.Passive.HaloOfProtection")),
+		FString("Abilities Passive HaloOfProtection"));
+
+	GameplayTags.Abilities_Passive_LifeSiphon = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName(TEXT("Abilities.Passive.LifeSiphon")),
+		FString("Abilities Passive LifeSiphon"));
+
+	GameplayTags.Abilities_Passive_ManaSiphon = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName(TEXT("Abilities.Passive.ManaSiphon")),
+		FString("Abilities Passive ManaSiphon"));
 
 
 	/** 技能菜单状态 */
@@ -328,6 +348,10 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 		FName(TEXT("Cooldown.Fire.FireBolt")),
 		FString("Cooldown Fire FireBolt Tag"));
 
+	GameplayTags.Cooldown_Lighting_Electrocute = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName(TEXT("Cooldown.Lighting.Electrocute")),
+		FString("Cooldown  Lighting Electrocute"));
+
 
 	GameplayTags.Effects_HitReact = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName(TEXT("Effects.HitReact")),
@@ -337,4 +361,12 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 	GameplayTags.GameplayCue_MeleeImpact = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName(TEXT("GameplayCue.MeleeImpact")),
 		FString("GameplayCue MeleeImpact"));
+
+	GameplayTags.GameplayCue_ShockBurst = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName(TEXT("GameplayCue.ShockBurst")),
+		FString("GameplayCue ShockBurst"));
+
+	GameplayTags.GameplayCue_ShockLoop = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName(TEXT("GameplayCue.ShockLoop")),
+		FString("GameplayCue ShockLoop"));
 }

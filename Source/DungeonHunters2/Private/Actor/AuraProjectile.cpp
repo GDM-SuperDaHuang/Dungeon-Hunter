@@ -49,6 +49,7 @@ void AAuraProjectile::BeginPlay()
 	Super::BeginPlay();
 	//设置寿命
 	SetLifeSpan(LiftSpan);
+	SetReplicateMovement(true);//??Call to a virtual function inside a constructor is resolved at compile time
 	// 动态绑定：当 Sphere 与任意组件发生 Overlap 时调用 OnSphereOverlap
 	Sphere->OnComponentBeginOverlap.AddDynamic(this, &AAuraProjectile::OnSphereOverlap);
 	if (LoopingSoundComponent)
@@ -89,6 +90,8 @@ void AAuraProjectile::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, 
                                       UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
                                       const FHitResult& SweepResult)
 {
+	if (DamageEffectParams.SourceAbilitySystemComponent==nullptr) return;
+	
 	AActor* SourceAvatarActor = DamageEffectParams.SourceAbilitySystemComponent->GetAvatarActor();
 	if (SourceAvatarActor == OtherActor) return;
 
