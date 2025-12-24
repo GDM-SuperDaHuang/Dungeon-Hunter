@@ -53,12 +53,27 @@ FDamageEffectParams UAuraDamageGameplayAbility::MakeDamageEffectParamsFromClassD
 
 	if (IsValid(TargetActor))
 	{
-		FRotator Rotation = (TargetActor->GetActorLocation() - GetAvatarActorFromActorInfo()->GetActorLocation()).
-			Rotation();
-		Rotation.Pitch = 45.f;
+		// FRotator Rotation = (TargetActor->GetActorLocation() - GetAvatarActorFromActorInfo()->GetActorLocation()).
+		// 	Rotation();
+		// Rotation.Pitch = 45.f;
+		// const FVector ToTarget = Rotation.Vector();
+		// Params.DeathImpulse = ToTarget * DeathImpulseMagnitude;
+		// Params.KnockbackForce = ToTarget * KnockbackMagnitude;
+
+		FRotator Rotation = (TargetActor->GetActorLocation() - GetAvatarActorFromActorInfo()->GetActorLocation()).Rotation();
+		if (bOverridePitch)
+		{
+			Rotation.Pitch = PitchOverride;
+		}
 		const FVector ToTarget = Rotation.Vector();
-		Params.DeathImpulse = ToTarget * DeathImpulseMagnitude;
-		Params.KnockbackForce = ToTarget * KnockbackMagnitude;
+		if (!bOverrideKnockbackDirection)
+		{
+			Params.KnockbackForce = ToTarget * KnockbackMagnitude;
+		}
+		if (!bOverrideDeathImpulse)
+		{
+			Params.DeathImpulse = ToTarget * DeathImpulseMagnitude;
+		}
 	}
 
 

@@ -13,6 +13,7 @@
 #include "Actor/MagicCircle.h"
 #include "Components/DecalComponent.h"
 #include "Components/SplineComponent.h"
+#include "DungeonHunters2/DungeonHunters2.h"
 #include "GameFramework/Character.h"
 #include "Input/AuraInputComponent.h"
 #include "Interaction/EnenmyInterface.h"
@@ -191,9 +192,10 @@ void AAuraPlayerController::CursorTrace()
 		ThisActor = nullptr;
 		return;
 	}
-
+	const ECollisionChannel TraceChannel = IsValid(MagicCircle) ? ECC_ExcludePlayers : ECC_Visibility;
+	GetHitResultUnderCursor(TraceChannel, false, CursorHit);
 	// 只检测 Visibility 通道；false=不复杂轨迹
-	GetHitResultUnderCursor(ECC_Visibility, false, CursorHit);
+	// GetHitResultUnderCursor(ECC_Visibility, false, CursorHit);
 	if (!CursorHit.bBlockingHit) return;
 	// 接口转换：当前/上一帧指向的敌人
 	LastActor = ThisActor;
