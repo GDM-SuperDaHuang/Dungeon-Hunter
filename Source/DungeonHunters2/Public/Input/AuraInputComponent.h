@@ -34,6 +34,9 @@ void UAuraInputComponent::BindAbilityActions(const UAuraInputConfig* InputConfig
 		{
 			if (PressedFunc)
 			{
+				/**
+				 * 
+				 */
 				BindAction(Action.InputAction, ETriggerEvent::Started, Object, PressedFunc, Action.InputTag);
 			}
 			if (ReleasedFunc)

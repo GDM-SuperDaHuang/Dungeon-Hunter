@@ -313,7 +313,7 @@ void UAureAttributeSet::HandleIncomingDamage(const FEffectProperties& Props)
 		ShowFloatingText(Props, LocalIncomingDamage, bBlocked, bCritical);
 		if (UAuraAbilitySystemLibrary::IsSuccessfulDebuff(Props.EffectContextHandle))
 		{
-			//处理debuff
+			//处理debuff， ← 创建周期性Debuff GE
 			Debuff(Props);
 		}
 	}
@@ -325,6 +325,7 @@ void UAureAttributeSet::Debuff(const FEffectProperties& Props)
 	FGameplayEffectContextHandle EffectContext = Props.SourceASC->MakeEffectContext();
 	EffectContext.AddSourceObject(Props.SourceAvatarActor);
 
+	// 1. 从Context读取Debuff参数（之前在DetermineDebuff中存入）
 	const FGameplayTag DamageType = UAuraAbilitySystemLibrary::GetDamageType(Props.EffectContextHandle);
 
 	// DebuffDamage = -1?
@@ -333,16 +334,21 @@ void UAureAttributeSet::Debuff(const FEffectProperties& Props)
 	const float DebuffFrequency = UAuraAbilitySystemLibrary::GetDebuffFrequency(Props.EffectContextHandle);
 
 
+	// 2. 动态创建GE实例（不在蓝图或CDO中预定义）
 	FString DebuffName = FString::Printf(TEXT("DynamicDebuff_%s"), *DamageType.ToString());
 	UGameplayEffect* Effect = NewObject<UGameplayEffect>(GetTransientPackage(), FName(DebuffName));
 
-	Effect->DurationPolicy = EGameplayEffectDurationType::HasDuration;
-	Effect->Period = DebuffFrequency;
-	Effect->DurationMagnitude = FScalableFloat(DebuffDuration);
+	// 3. 配置GE属性
+	Effect->DurationPolicy = EGameplayEffectDurationType::HasDuration;// 持续型
+	Effect->Period = DebuffFrequency; // 周期触发
+	Effect->DurationMagnitude = FScalableFloat(DebuffDuration);// 总时长
 
 	// 触发回调ASC的RegisterGameplayTagEvent回调DebuffTagChanged。
 	// FGameplayTag DamageTypesToDebuff = GameplayTags.DamageTypesToDebuffs[DamageType];
 	// Effect->InheritableOwnedTagsContainer.AddTag(GameplayTags.DamageTypesToDebuffs[DamageType]);
+
+	// 4. 【关键】添加Modifier，这才是周期伤害的来源！
+    // 使用SetByCallerMagnitude，这样每次周期都能动态获取伤害值
 	FInheritedTagContainer TagContainer = FInheritedTagContainer();
 	UTargetTagsGameplayEffectComponent& Component = Effect->FindOrAddComponent<UTargetTagsGameplayEffectComponent>();
 	TagContainer.Added.AddTag(GameplayTags.DamageTypesToDebuffs[DamageType]);
@@ -357,7 +363,7 @@ void UAureAttributeSet::Debuff(const FEffectProperties& Props)
 		Effect->InheritableOwnedTagsContainer.AddTag(GameplayTags.Play_Block_CursorTrace);
 	}
 
-	
+	 // 5. 配置堆叠规则
 	Effect->StackingType = EGameplayEffectStackingType::AggregateBySource;
 	Effect->StackLimitCount = 1;
 
@@ -365,16 +371,19 @@ void UAureAttributeSet::Debuff(const FEffectProperties& Props)
 	Effect->Modifiers.Add(FGameplayModifierInfo());
 	FGameplayModifierInfo& ModifierInfo = Effect->Modifiers[Index];
 
-	ModifierInfo.ModifierMagnitude = FScalableFloat(DebuffDamage);
-	ModifierInfo.ModifierOp = EGameplayModOp::Additive;
-	ModifierInfo.Attribute = UAureAttributeSet::GetIncomingDamageAttribute();
+	// 6. 【核心】添加伤害Modifier
+	ModifierInfo.ModifierMagnitude = FScalableFloat(DebuffDamage);// 伤害值
+	ModifierInfo.ModifierOp = EGameplayModOp::Additive;// 累加操作
+	ModifierInfo.Attribute = UAureAttributeSet::GetIncomingDamageAttribute();// 目标属性
+	// 7. 【最终应用】将GE应用到目标！
 	if (FGameplayEffectSpec* MutableSpec = new FGameplayEffectSpec(Effect, EffectContext, 1.f))
 	{
 		FAuraGameplayEffectContext* AuraContext = static_cast<FAuraGameplayEffectContext*>(MutableSpec->GetContext().
 			Get());
 		TSharedPtr<FGameplayTag> DebuffDamageType = MakeShareable(new FGameplayTag(DamageType));
-		AuraContext->SetDamageType(DebuffDamageType);
+		AuraContext->SetDamageType(DebuffDamageType);// 传递伤害类型给后续处理
 
+		// 8. 真正应用周期伤害GE（服务器执行）
 		FActiveGameplayEffectHandle ApplyGameplayEffectSpecToSelf = Props.TargetASC->ApplyGameplayEffectSpecToSelf(*MutableSpec);
 		if (ApplyGameplayEffectSpecToSelf.WasSuccessfullyApplied())
 		{

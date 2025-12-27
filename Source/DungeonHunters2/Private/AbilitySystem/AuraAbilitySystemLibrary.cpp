@@ -543,24 +543,34 @@ FGameplayEffectContextHandle UAuraAbilitySystemLibrary::ApplyDamageEffect(const 
 
 	const AActor* SourceAvatarActor = DamageEffectParams.SourceAbilitySystemComponent->GetAvatarActor();
 
-	FGameplayEffectContextHandle EffectContextHandle = DamageEffectParams.SourceAbilitySystemComponent->
-	                                                                      MakeEffectContext();
+	// 1. 【创建基础上下文】—— GAS效果的"身份证",
+	FGameplayEffectContextHandle EffectContextHandle = DamageEffectParams.SourceAbilitySystemComponent->MakeEffectContext();
+																		
+	// 记录伤害来源（用于仇恨、击杀统计）
 	EffectContextHandle.AddSourceObject(SourceAvatarActor);
+
+	// 2. 【扩展上下文数据】—— 这是核心创新点！
+    // 将物理反馈参数存入自定义上下文，供ExecutionCalculation读取
 	SetDeathImpulse(EffectContextHandle, DamageEffectParams.DeathImpulse);
 	SetKnockbackForce(EffectContextHandle, DamageEffectParams.KnockbackForce);
 
+	// 3. 【范围伤害参数】—— 供ExecCalc_Damage判断是否使用径向伤害
 	SetIsRadialDamage(EffectContextHandle, DamageEffectParams.bIsRadialDamage);
 	SetRadialDamageInnerRadius(EffectContextHandle, DamageEffectParams.RadialDamageInnerRadius);
 	SetRadialDamageOuterRadius(EffectContextHandle, DamageEffectParams.RadialDamageOuterRadius);
 	SetRadialDamageOrigin(EffectContextHandle, DamageEffectParams.RadialDamageOrigin);
 
+	// 4. 【创建效果规格】—— GE_Damage的"执行计划书"
 	const FGameplayEffectSpecHandle SpecHandle = DamageEffectParams.SourceAbilitySystemComponent->MakeOutgoingSpec(
 		DamageEffectParams.DamageGameplayEffectClass, DamageEffectParams.AbilityLevel, EffectContextHandle);
 
 	// 有问题？
-	UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, DamageEffectParams.DamageType,
-	                                                              DamageEffectParams.BaseDamage);
+	 // 5. 【SetByCaller动态赋值】—— 运行时注入伤害值，避免硬编码
+    // 使用SetByCallerMagnitude可在ExecCalc中通过Spec.GetSetByCallerMagnitude()读取
+	UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, DamageEffectParams.DamageType,DamageEffectParams.BaseDamage);
 
+    // 5. 【SetByCaller动态赋值】—— 运行时注入伤害值，避免硬编码
+    // 使用SetByCallerMagnitude可在ExecCalc中通过Spec.GetSetByCallerMagnitude()读取
 	UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, GameplayTags.Debuff_Damage,
 	                                                              DamageEffectParams.DebuffDamage);
 
@@ -581,6 +591,9 @@ FGameplayEffectContextHandle UAuraAbilitySystemLibrary::ApplyDamageEffect(const 
 	// SpecHandle = {FGameplayEffectSpecHandle} {Data=SharedPtr=0x0000086295be3600 {Def={={ObjectPtr=0x0000086271e51800 (Name="Default__GE_Damage_C", InternalFlags=ReachabilityFlag2), DebugPtr=0x0000086271e51800 (Name="Default__GE_Damage_C", InternalFlags=ReachabilityFlag2)}}, ModifiedAttributes=...}}
 	// $rdi = 0x0000006739f74e30 [443354140208]
 	// $rsp = 0x0000006739f74ba0 [443354139552]
+	
+    // 7. 【应用效果到目标】—— 最终触发ExecCalc_Damage::Execute_Implementation(),需要蓝图中配置ExecCalc_Damage计算类
+    // 注意：这里无论是否预测都会执行，但客户端的预测版本会被服务器校正
 	DamageEffectParams.TargetAbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data);
 
 	return EffectContextHandle;
