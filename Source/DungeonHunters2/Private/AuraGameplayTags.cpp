@@ -360,6 +360,9 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 		FName(TEXT("Cooldown.Arcane.ArcaneShards")),
 		FString("Cooldown  Arcane ArcaneShards"));
 
+	GameplayTags.Cooldown_Fire_FireBlast = UGameplayTagsManager::Get().AddNativeGameplayTag(
+	FName(TEXT("Cooldown.Fire.FireBlast")),
+	FString("Cooldown  Fire FireBlast"));
 
 	GameplayTags.Effects_HitReact = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName(TEXT("Effects.HitReact")),
@@ -381,4 +384,8 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 	GameplayTags.GameplayCue_ArcaneShards = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName(TEXT("GameplayCue.ArcaneShards")),
 		FString("GameplayCue ArcaneShards"));
+
+	GameplayTags.GameplayCue_FireBlast = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName(TEXT("GameplayCue.FireBlast")),
+		FString("GameplayCue FireBlast"));
 }

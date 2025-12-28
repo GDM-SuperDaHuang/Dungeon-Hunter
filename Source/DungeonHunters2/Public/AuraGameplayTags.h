@@ -135,6 +135,7 @@ public:
 	FGameplayTag Cooldown_Fire_FireBolt;
 	FGameplayTag Cooldown_Lighting_Electrocute;
 	FGameplayTag Cooldown_Arcane_ArcaneShards;
+	FGameplayTag Cooldown_Fire_FireBlast;
 
 
 	
@@ -151,8 +152,9 @@ public:
 	FGameplayTag GameplayCue_ShockBurst;
 	FGameplayTag GameplayCue_ShockLoop;
 	FGameplayTag GameplayCue_ArcaneShards;
+	FGameplayTag GameplayCue_FireBlast;
 
-
+        
 
 	// 输入通知
 	FGameplayTag Play_Block_InputPressed;
