@@ -41,12 +41,12 @@ public:
 // 	
 //
 //
-// 	void SetPlayerName(FString InPlayerName);
+// 	void SetPlayerName(FString InPlayerName);//命名规则，Set+字段名,否则显式指定函数名
 // 	void SetMapName(FString InMapName);
 // 	void SetPlayerLevel(int32 InLevel);
 // 	void SetLoadSlotName(FString InLoadSlotName);
 //
-// 	FString GetPlayerName() const { return PlayerName; }
+// 	FString GetPlayerName() const { return PlayerName; }//命名规则，Get+字段名
 // 	FString GetMapName() const { return MapName; }
 // 	int32 GetPlayerLevel() const { return PlayerLevel; }
 // 	FString GetLoadSlotName() const { return LoadSlotName; }
@@ -54,6 +54,7 @@ public:
 // private:
 //
 // 	UPROPERTY(EditAnywhere, BlueprintReadWrite, FieldNotify, Setter, Getter, meta = (AllowPrivateAccess="true"));
+//  UPROPERTY(EditAnywhere, BlueprintReadWrite, FieldNotify, Setter="SetPlayerName", Getter="GetPlayerName", meta = (AllowPrivateAccess="true"));
 // 	FString PlayerName;
 //
 // 	UPROPERTY(EditAnywhere, BlueprintReadWrite, FieldNotify, Setter, Getter, meta = (AllowPrivateAccess="true"));
