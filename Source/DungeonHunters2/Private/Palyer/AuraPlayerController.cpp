@@ -75,8 +75,7 @@ void AAuraPlayerController::BeginPlay()
 	check(AuraContext);
 
 	// 拿到本地玩家的 EnhancedInput 子系统，用于动态挂/卸映射上下文
-	UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(
-		GetLocalPlayer());
+	UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer());
 	// check(Subsystem);单人游戏
 	// 将输入映射上下文（AuraContext）添加到子系统，优先级为0（数值越小优先级越高）
 	if (Subsystem) //多人游戏
