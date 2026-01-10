@@ -16,8 +16,8 @@
 AAuraCharacterBase::AAuraCharacterBase()
 {
 	// 不让角色 Tick，性能优化（子类需要再开）
-	FAuraGameplayTags GameplayTags = FAuraGameplayTags::Get();
-	PrimaryActorTick.bCanEverTick = true;
+FAuraGameplayTags GameplayTags = FAuraGameplayTags::Get();
+	PrimaryActorTick.bCanEverTick = true;	
 	BurnDebuffComponent = CreateDefaultSubobject<UDebuffNiagaraComponent>("BurnDebuffComponent");
 	BurnDebuffComponent->SetupAttachment(GetRootComponent());
 	BurnDebuffComponent->DebuffTag = GameplayTags.Debuff_Burn;// ???
